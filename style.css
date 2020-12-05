@@ -5,13 +5,21 @@ html { background-color: #333333;}
 .d-flex { display: flex;}
 .flex-column { flex-direction: column;}
 .justify-content-between { justify-content: space-between;}
+.align-self-stretch { align-self: stretch;}
 
 .bg-light { background-color: #dddddd;}
 
 .vh-100 { height: 100vh;}
+.h-100 { height: 100%;}
 .mw-mc{ max-width: max-content;}
+.w-100{ width: 100%;}
 
 .p-2 {padding: 0.5rem;}
 
 .m-0 {margin: 0rem;}
 .m-1 {margin: 0.25rem;}
+.mt-0 {margin-top: 0rem;}
+
+.overflow-hidden {overflow: hidden;}
+
+.br-1 {border-right: 1px solid black;}

@@ -7,6 +7,7 @@ document.getElementById('load-classes-button').addEventListener('click', async (
   const file = await fileHandle.getFile();
   classes = await parseCSV(file);
   console.log(classes[0]);
+  checkifbothloaded();
 });
 
 document.getElementById('load-dependencies-button').addEventListener('click', async () => {
@@ -14,6 +15,7 @@ document.getElementById('load-dependencies-button').addEventListener('click', as
   const file = await fileHandle.getFile();
   dependencies = await parseDepCSV(file);
   console.log(dependencies[0]);
+  checkifbothloaded();
 });
 
 async function parseCSV(file) {
@@ -67,4 +69,10 @@ async function parseDepCSV(file) {
     result.push(obj);
   }
   return result;
+}
+
+function checkifbothloaded() {
+  if (classes != null && classes.length > 0 && dependencies != null && dependencies.length > 0) {
+    draw();
+  }
 }
