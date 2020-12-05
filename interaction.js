@@ -6,10 +6,23 @@ function draw() {
   var width = svgWidth - margin.right - margin.left;
   var height = svgHeight - margin.top - margin.bottom;
 
+  const zoom = d3.zoom()
+    .extent([[0, 0], [width, height]])
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
   d3.select("#chart").selectAll("g").remove();
   var svg = d3.select("#chart")
-      .append("g")
-      .attr("transform", "translate( " + margin.left + ", " + margin.top + ")");
+    .attr("viewBox", [0, 0, svgWidth, svgHeight])
+    .call(zoom)
+    .append("g")
+    .attr('width', width)
+    .attr('height', height)
+    .attr("transform", "translate( " + margin.left + ", " + margin.top + ")");
+
+  function zoomed(event, d) {
+    svg.attr("transform", event.transform);
+  }
 
   var x = d3.scaleLinear()
     .domain([0, 100])
