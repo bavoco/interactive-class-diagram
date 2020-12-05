@@ -2,13 +2,23 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
     <title>Interactive class diagrams</title>
+    <link rel="stylesheet" href="style.css">
   </head>
-  <body>
-
+  <body class="m-0 d-flex">
+    <!-- sidebar -->
+    <div class="d-flex flex-column bg-light p-2 mw-mc justify-content-between vh-100">
+      <h3>Interactive<br>Class Diagrams</h3>
+      <div class="d-flex flex-column">
+        <button id="load-data-button" type="button" class="m-1">Load data</button>
+        <button id="select-data-button" type="button" class="m-1">Select data</button>
+      </div>
+      <span class="text-muted">SET seminar<br><br>Bavo Coremans<br><br>Supervisor:<br>Michel Chaudron</span>
+    </div>
+    <script src="node_modules/d3/dist/d3.min.js"></script>
+    <script src="data.js"></script>
+    <script src="data-helpers.js"></script>
+    <script src="interaction.js"></script>
   </body>
-  <script src="node_modules/d3/dist/d3.min.js"></script>
-  <script src="data.js"></script>
-  <script src="data-helpers.js"></script>
-  <script src="interaction.js"></script>
 </html>

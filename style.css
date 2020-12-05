@@ -1,0 +1,17 @@
+html { background-color: #333333;}
+
+.text-muted { color: #6c757d!important; }
+
+.d-flex { display: flex;}
+.flex-column { flex-direction: column;}
+.justify-content-between { justify-content: space-between;}
+
+.bg-light { background-color: #dddddd;}
+
+.vh-100 { height: 100vh;}
+.mw-mc{ max-width: max-content;}
+
+.p-2 {padding: 0.5rem;}
+
+.m-0 {margin: 0rem;}
+.m-1 {margin: 0.25rem;}
