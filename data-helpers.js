@@ -8,6 +8,7 @@ document.getElementById('load-classes-button').addEventListener('click', async (
   classes = await parseCSV(file);
   console.log(classes[0]);
   checkifbothloaded();
+  numClassesPerRole();
 });
 
 document.getElementById('load-dependencies-button').addEventListener('click', async () => {
