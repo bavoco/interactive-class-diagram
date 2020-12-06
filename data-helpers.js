@@ -5,7 +5,8 @@ var dependencies;
 document.getElementById('load-classes-button').addEventListener('click', async () => {
   [fileHandle] = await window.showOpenFilePicker();
   const file = await fileHandle.getFile();
-  classes = await parseCSV(file);
+  var contents = await file.text();
+  classes = await parseCSV(contents);
   console.log(classes[0]);
   checkifbothloaded();
   numClassesPerRole();
@@ -14,13 +15,13 @@ document.getElementById('load-classes-button').addEventListener('click', async (
 document.getElementById('load-dependencies-button').addEventListener('click', async () => {
   [fileHandle] = await window.showOpenFilePicker();
   const file = await fileHandle.getFile();
-  dependencies = await parseDepCSV(file);
+  var contents = await file.text();
+  dependencies = await parseDepCSV(contents);
   console.log(dependencies[0]);
   checkifbothloaded();
 });
 
-async function parseCSV(file) {
-  var contents = await file.text();
+async function parseCSV(contents) {
   contents = contents.replace('\r\n', '\n');
   if (contents.endsWith('\n')) {
     contents = contents.slice(0, -2);
@@ -42,8 +43,7 @@ async function parseCSV(file) {
   return result;
 }
 
-async function parseDepCSV(file) {
-  var contents = await file.text();
+async function parseDepCSV(contents) {
   contents = contents.replace('\r\n', '\n');
   if (contents.endsWith('\n')) {
     contents = contents.slice(0, -2);
@@ -76,4 +76,13 @@ function checkifbothloaded() {
   if (classes != null && classes.length > 0 && dependencies != null && dependencies.length > 0) {
     draw();
   }
+}
+
+document.addEventListener('load', loadFiles());
+
+async function loadFiles() {
+  classes = await parseCSV(classes_file.text);
+  numClassesPerRole();
+  dependencies = await parseDepCSV(dependencies_file.text);
+  checkifbothloaded();
 }
