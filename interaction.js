@@ -5,6 +5,7 @@ function draw() {
   var margin = {top: 20, right: 30, bottom: 20, left: 20};
   var width = svgWidth - margin.right - margin.left;
   var height = svgHeight - margin.top - margin.bottom;
+  var classWidth = 20;
 
   const zoom = d3.zoom()
     .extent([[0, 0], [width, height]])
@@ -49,4 +50,22 @@ function draw() {
     .attr("height", 20)
     .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")"; })
     .attr("fill", function(d) { return roles[d.label].color; });
+
+  newrect.append("text")
+    .attr("x", classWidth/2)
+    .attr("y", function(d) { return 2; })
+    .attr("font-size", function(d) { return 2; })
+    .style("text-anchor", "middle")
+    .text(function(d) {
+      return "<<" + d.label + ">>";
+    });
+
+  newrect.append("text")
+    .attr("x", classWidth/2)
+    .attr("y", function(d) { return 4; })
+    .attr("font-size", function(d) { return 2; })
+    .style("text-anchor", "middle")
+    .text(function(d) {
+      return d.classname;
+    });
 }
