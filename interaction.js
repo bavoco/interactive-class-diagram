@@ -37,7 +37,7 @@ function draw() {
 
   var newrect = rects.enter()
     .append("g")
-    .attr("transform", function(d, i) { return "translate(" + i * 25 % width + "," + (i * 25) / width * 25 + ")"; }).merge(rects);
+    .attr("transform", function(d, i) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; }).merge(rects);
 
   newrect.selectAll("line").remove();
   newrect.selectAll("text").remove();

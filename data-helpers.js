@@ -27,7 +27,7 @@ async function parseCSV(contents) {
     contents = contents.slice(0, -2);
   }
   var lines = contents.split("\n");
-  console.log(lines.length);
+  console.log(lines.length-1);
   var result = [];
   var headers = lines[0].split(",");
   console.log(headers);
@@ -74,6 +74,7 @@ async function parseDepCSV(contents) {
 
 function checkifbothloaded() {
   if (classes != null && classes.length > 0 && dependencies != null && dependencies.length > 0) {
+    placement();
     draw();
   }
 }
