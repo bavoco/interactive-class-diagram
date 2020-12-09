@@ -20,6 +20,9 @@ function draw() {
   var classWidth = 20;
 
   svgElement.setAttribute("viewBox", [0, 0, svgWidth, svgHeight]);
+  while (main_g.firstChild) {
+    main_g.removeChild(main_g.firstChild);
+  }
 
   var x = function(val) {
     return 0.01 * val * width;
@@ -32,6 +35,9 @@ function draw() {
   // var rects = svgElement.firstChild.getElementsByTagName("g");
 
   classes.forEach((item, i) => {
+    if (zoomlevel < 6 && item.label == "Information Holder") {
+      return;
+    }
     let class_holder = document.createElementNS(ns, "g");
     class_holder.setAttribute("transform", "translate(" + x(item.x) + "," + y(item.y) + ")");
     main_g.appendChild(class_holder);
@@ -61,7 +67,13 @@ function draw() {
   });
 
   dependencies.forEach((item, i) => {
+    if (zoomlevel < 6 && classes[i].label == "Information Holder") {
+      return;
+    }
     for (const [key, value] of Object.entries(item)) {
+      if (zoomlevel < 6 && classes[key].label == "Information Holder") {
+        return;
+      }
       let elem = document.createElementNS(ns, "line");
       elem.setAttribute("x1", x(classes[i].x));
       elem.setAttribute("y1", y(classes[i].y));
@@ -78,10 +90,11 @@ function draw() {
 function zoom(e) {
   e.preventDefault();
   let oldzoom = zoomlevel
-  zoomlevel += e.deltaY * -0.001;
+  zoomlevel += e.deltaY * -0.01;
   // Restrict scale
   zoomlevel = Math.min(Math.max(.75, zoomlevel), 8);
   let zoom_fac = zoomlevel - oldzoom;
+  draw();
   pan(0, 0,
     -(e.offsetX/svgElement.clientWidth*svgElement.clientWidth*zoom_fac),
     -(e.offsetY/svgElement.clientHeight*svgElement.clientHeight*zoom_fac)
