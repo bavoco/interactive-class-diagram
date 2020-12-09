@@ -59,9 +59,19 @@ function draw() {
     elem.appendChild(document.createTextNode(item.classname));
     class_holder.appendChild(elem);
   });
-}
 
-function update() {
+  dependencies.forEach((item, i) => {
+    for (const [key, value] of Object.entries(item)) {
+      let elem = document.createElementNS(ns, "line");
+      elem.setAttribute("x1", x(classes[i].x));
+      elem.setAttribute("y1", y(classes[i].y));
+      elem.setAttribute("x2", x(classes[key].x));
+      elem.setAttribute("y2", y(classes[key].y));
+      elem.setAttribute("stroke", "black");
+      elem.setAttribute("stroke-width", .5);
+      main_g.appendChild(elem);
+    }
+  });
 
 }
 
