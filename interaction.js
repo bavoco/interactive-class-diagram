@@ -48,7 +48,7 @@ function draw() {
     elem.setAttribute("y", 2);
     elem.setAttribute("font-size", 2);
     elem.setAttribute("style", "text-anchor: middle;");
-    elem.innerText = "<<" + item.label + ">>";
+    elem.appendChild(document.createTextNode("<<" + item.label + ">>"));
     class_holder.appendChild(elem);
 
     elem = document.createElementNS(ns, "text");
@@ -56,7 +56,7 @@ function draw() {
     elem.setAttribute("y", 4);
     elem.setAttribute("font-size", 2);
     elem.setAttribute("style", "text-anchor: middle;");
-    elem.innerText = item.classname;
+    elem.appendChild(document.createTextNode(item.classname));
     class_holder.appendChild(elem);
   });
 }
@@ -70,19 +70,12 @@ function zoom(e) {
   let oldzoom = zoomlevel
   zoomlevel += e.deltaY * -0.001;
   // Restrict scale
-  zoomlevel = Math.min(Math.max(.125, zoomlevel), 4);
+  zoomlevel = Math.min(Math.max(.75, zoomlevel), 8);
   let zoom_fac = zoomlevel - oldzoom;
-  if (zoom_fac >= 0) {
-    pan(0, 0,
-      -(e.offsetX/svgElement.clientWidth*svgElement.clientWidth*zoom_fac),
-      -(e.offsetY/svgElement.clientHeight*svgElement.clientHeight*zoom_fac)
-    );
-  } else {
-    pan(0, 0,
-      -(svgElement.clientWidth*zoom_fac*0.5),
-      -(svgElement.clientHeight*zoom_fac*0.5)
-    );
-  }
+  pan(0, 0,
+    -(e.offsetX/svgElement.clientWidth*svgElement.clientWidth*zoom_fac),
+    -(e.offsetY/svgElement.clientHeight*svgElement.clientHeight*zoom_fac)
+  );
 }
 
 function pan(x, y, new_x, new_y) {
@@ -90,8 +83,6 @@ function pan(x, y, new_x, new_y) {
   pan_y = pan_y + new_y - y;
   main_g.setAttribute("transform", "translate("+pan_x+","+pan_y+") scale("+zoomlevel+")");
 }
-
-
 
 svgElement.addEventListener('wheel', zoom, {passive: false});
 
