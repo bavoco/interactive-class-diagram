@@ -1,71 +1,119 @@
+var svgElement = document.getElementById('chart');
+var margin = {top: 20, right: 30, bottom: 20, left: 20};
+var ns = 'http://www.w3.org/2000/svg';
+var zoomlevel = 1;
+let elem = document.createElementNS(ns, "g");
+elem.setAttribute("transform", "translate(" + margin.right + "," + margin.top + ")");
+svgElement.appendChild(elem);
+var main_g = svgElement.firstChild;
+let isDragging = false;
+let mouse_x = 0;
+let mouse_y = 0;
+let pan_x = 0;
+let pan_y = 0;
+
 function draw() {
-  var svgElement = document.getElementById('chart');
   var svgWidth = svgElement.clientWidth;
   var svgHeight = svgElement.clientHeight;
-  var margin = {top: 20, right: 30, bottom: 20, left: 20};
   var width = svgWidth - margin.right - margin.left;
   var height = svgHeight - margin.top - margin.bottom;
   var classWidth = 20;
 
-  const zoom = d3.zoom()
-    .extent([[0, 0], [width, height]])
-    .scaleExtent([1, 8])
-    .on("zoom", zoomed);
+  svgElement.setAttribute("viewBox", [0, 0, svgWidth, svgHeight]);
 
-  d3.select("#chart").selectAll("g").remove();
-  var svg = d3.select("#chart")
-    .attr("viewBox", [0, 0, svgWidth, svgHeight])
-    .call(zoom)
-    .append("g")
-    .attr('width', width)
-    .attr('height', height)
-    .attr("transform", "translate( " + margin.left + ", " + margin.top + ")");
-
-  function zoomed(event, d) {
-    svg.attr("transform", event.transform);
+  var x = function(val) {
+    return 0.01 * val * width;
   }
 
-  var x = d3.scaleLinear()
-    .domain([0, 100])
-    .range([0, width]);
-  var y = d3.scaleLinear()
-    .domain([0, 100])
-    .range([0, height]);
+  var y = function(val) {
+    return 0.01 * val * height;
+  }
 
-  var rects = svg.selectAll("g").data(classes);
+  // var rects = svgElement.firstChild.getElementsByTagName("g");
 
-  rects.exit().remove();
+  classes.forEach((item, i) => {
+    let class_holder = document.createElementNS(ns, "g");
+    class_holder.setAttribute("transform", "translate(" + x(item.x) + "," + y(item.y) + ")");
+    main_g.appendChild(class_holder);
 
-  var newrect = rects.enter()
-    .append("g")
-    .attr("transform", function(d, i) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; }).merge(rects);
+    let elem = document.createElementNS(ns, "rect");
+    elem.setAttribute("width", classWidth);
+    elem.setAttribute("height", classWidth);
+    elem.setAttribute("transform", "translate(" + 0 + "," + 0 + ")");
+    elem.setAttribute("fill", roles[item.label].color);
+    class_holder.appendChild(elem);
 
-  newrect.selectAll("line").remove();
-  newrect.selectAll("text").remove();
-  newrect.selectAll("rect").remove();
-  newrect.selectAll("a").remove();
+    elem = document.createElementNS(ns, "text");
+    elem.setAttribute("x", classWidth/2);
+    elem.setAttribute("y", 2);
+    elem.setAttribute("font-size", 2);
+    elem.setAttribute("style", "text-anchor: middle;");
+    elem.innerText = "<<" + item.label + ">>";
+    class_holder.appendChild(elem);
 
-  newrect.append("rect")
-    .attr("width", 20)
-    .attr("height", 20)
-    .attr("transform", function(d) { return "translate(" + 0 + ", " + 0 + ")"; })
-    .attr("fill", function(d) { return roles[d.label].color; });
-
-  newrect.append("text")
-    .attr("x", classWidth/2)
-    .attr("y", function(d) { return 2; })
-    .attr("font-size", function(d) { return 2; })
-    .style("text-anchor", "middle")
-    .text(function(d) {
-      return "<<" + d.label + ">>";
-    });
-
-  newrect.append("text")
-    .attr("x", classWidth/2)
-    .attr("y", function(d) { return 4; })
-    .attr("font-size", function(d) { return 2; })
-    .style("text-anchor", "middle")
-    .text(function(d) {
-      return d.classname;
-    });
+    elem = document.createElementNS(ns, "text");
+    elem.setAttribute("x", classWidth/2);
+    elem.setAttribute("y", 4);
+    elem.setAttribute("font-size", 2);
+    elem.setAttribute("style", "text-anchor: middle;");
+    elem.innerText = item.classname;
+    class_holder.appendChild(elem);
+  });
 }
+
+function update() {
+
+}
+
+function zoom(e) {
+  e.preventDefault();
+  let oldzoom = zoomlevel
+  zoomlevel += e.deltaY * -0.001;
+  // Restrict scale
+  zoomlevel = Math.min(Math.max(.125, zoomlevel), 4);
+  let zoom_fac = zoomlevel - oldzoom;
+  if (zoom_fac >= 0) {
+    pan(0, 0,
+      -(e.offsetX/svgElement.clientWidth*svgElement.clientWidth*zoom_fac),
+      -(e.offsetY/svgElement.clientHeight*svgElement.clientHeight*zoom_fac)
+    );
+  } else {
+    pan(0, 0,
+      -(svgElement.clientWidth*zoom_fac*0.5),
+      -(svgElement.clientHeight*zoom_fac*0.5)
+    );
+  }
+}
+
+function pan(x, y, new_x, new_y) {
+  pan_x = pan_x + new_x - x;
+  pan_y = pan_y + new_y - y;
+  main_g.setAttribute("transform", "translate("+pan_x+","+pan_y+") scale("+zoomlevel+")");
+}
+
+
+
+svgElement.addEventListener('wheel', zoom, {passive: false});
+
+svgElement.addEventListener('mousedown', e => {
+  mouse_x = e.offsetX;
+  mouse_y = e.offsetY;
+  isDragging = true;
+});
+
+svgElement.addEventListener('mousemove', e => {
+  if (isDragging === true) {
+    pan(mouse_x, mouse_y, e.offsetX, e.offsetY);
+    mouse_x = e.offsetX;
+    mouse_y = e.offsetY;
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (isDragging === true) {
+    pan(mouse_x, mouse_y, e.offsetX, e.offsetY);
+    mouse_x = e.offsetX;
+    mouse_y = e.offsetY;
+    isDragging = false;
+  }
+});
