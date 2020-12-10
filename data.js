@@ -7,6 +7,7 @@ var roles = {
   "Service Provider": {color: "#23B9DC"},
   "Structurer": {color: "#B64991"}
 };
+var reverse_dependencies = [];
 
 function maxDependencies() {
 
@@ -39,29 +40,61 @@ function getRandomPos(i) {
 }
 
 function placement() {
-  classes.forEach((item, i) => {
-    [item.x, item.y] = getRandomPos(i);
-  });
-  for (var k = 0; k < 2; k++) {
-    dependencies.forEach((item, i) => {
-      for (const [key, value] of Object.entries(item)) {
-        if (value == 1) {
-          classes[i].x = 0.1 * classes[key].x + 0.9 * classes[i].x;
-          classes[i].y = 0.1 * classes[key].y + 0.9 * classes[i].y;
-          classes[key].x = 0.9 * classes[key].x + 0.1 * classes[i].x;
-          classes[key].y = 0.9 * classes[key].y + 0.1 * classes[i].y;
-        } else if (value == 2) {
-          classes[i].x = 0.1 * classes[key].x + 0.9 * classes[i].x;
-          classes[i].y = 0.1 * classes[key].y + 0.9 * classes[i].y;
-          classes[key].x = 0.9 * classes[key].x + 0.1 * classes[i].x;
-          classes[key].y = 0.9 * classes[key].y + 0.1 * classes[i].y;
-        } else if (value == 3) {
-          classes[i].x = 0.1 * classes[key].x + 0.9 * classes[i].x;
-          classes[i].y = 0.1 * classes[key].y + 0.9 * classes[i].y;
-          classes[key].x = 0.9 * classes[key].x + 0.1 * classes[i].x;
-          classes[key].y = 0.9 * classes[key].y + 0.1 * classes[i].y;
+  computeReverseDependencies();
+  let layers = computeLayers();
+  // classes.forEach((item, i) => {
+  //   [item.x, item.y] = getRandomPos(i);
+  // });
+  for (var i = Object.keys(layers).length; i > 0; i--) {
+    for (var j = 0; j < layers[i].length; j++) {
+      classes[layers[i][j]].x = (j * 2) % 100;
+      classes[layers[i][j]].y = i * 25 + Math.floor(j*2/100) * 3;
+    }
+  }
+}
+
+function computeReverseDependencies() {
+  for (var i = 0; i < dependencies.length; i++) {
+    reverse_dependencies.push({});
+  }
+  for (var i = 0; i < dependencies.length; i++) {
+    for (const [key, value] of Object.entries(dependencies[i])) {
+      reverse_dependencies[key][i] = value;
+    }
+  }
+}
+
+function computeLayers() {
+  let layers = {};
+  let layer_classes = [];
+  for (var i = 0; i < dependencies.length; i++) {
+    if (Object.keys(reverse_dependencies[i]).length == 0 && Object.keys(dependencies[i]).length == 0) {
+      layer_classes.push(i);
+    }
+  }
+  layers[9] = layer_classes;
+  layer_classes = [];
+  for (var i = 0; i < dependencies.length; i++) {
+    if (!layers[9].includes(i)) {
+      layer_classes.push(i);
+    }
+  }
+  layers[8] = [];
+  i = 7;
+  while (layer_classes.length > 0) {
+    next_layer_classes = [];
+    for (var j = 0; j < layer_classes.length; j++) {
+      for (const [key, value] of Object.entries(dependencies[layer_classes[j]])) {
+        let index = layer_classes.indexOf(parseInt(key));
+        if (index > 0) {
+          layer_classes.splice(index, 1);
+          next_layer_classes.push(parseInt(key));
         }
       }
-    });
+    }
+    layers[eval(i)] = layer_classes;
+    layer_classes = next_layer_classes;
+    i--;
   }
+  return layers;
 }

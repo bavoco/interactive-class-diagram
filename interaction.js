@@ -80,7 +80,7 @@ function draw() {
       elem.setAttribute("x2", x(classes[key].x));
       elem.setAttribute("y2", y(classes[key].y));
       elem.setAttribute("stroke", "black");
-      elem.setAttribute("stroke-width", .5);
+      elem.setAttribute("stroke-width", .2);
       main_g.appendChild(elem);
     }
   });
@@ -92,7 +92,7 @@ function zoom(e) {
   let oldzoom = zoomlevel;
   zoomlevel += e.deltaY * -0.01;
   // Restrict scale
-  zoomlevel = Math.min(Math.max(1, zoomlevel), 8);
+  zoomlevel = Math.min(Math.max(0.5, zoomlevel), 8);
   let zoom_dif = zoomlevel - oldzoom;
   if (zoom_dif != 0) {
     let old_svg_x = (e.offsetX - margin.left - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
