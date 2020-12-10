@@ -1,5 +1,5 @@
 var svgElement = document.getElementById('chart');
-var margin = {top: 20, right: 30, bottom: 20, left: 20};
+var margin = {top: 0, right: 30, bottom: 20, left: 0};
 var ns = 'http://www.w3.org/2000/svg';
 var zoomlevel = 1;
 let elem = document.createElementNS(ns, "g");
@@ -89,16 +89,17 @@ function draw() {
 
 function zoom(e) {
   e.preventDefault();
-  let oldzoom = zoomlevel
+  let oldzoom = zoomlevel;
   zoomlevel += e.deltaY * -0.01;
   // Restrict scale
-  zoomlevel = Math.min(Math.max(.75, zoomlevel), 8);
-  let zoom_fac = zoomlevel - oldzoom;
-  draw();
-  pan(0, 0,
-    -(e.offsetX/svgElement.clientWidth*svgElement.clientWidth*zoom_fac),
-    -(e.offsetY/svgElement.clientHeight*svgElement.clientHeight*zoom_fac)
-  );
+  zoomlevel = Math.min(Math.max(1, zoomlevel), 8);
+  let zoom_dif = zoomlevel - oldzoom;
+  if (zoom_dif != 0) {
+    let old_svg_x = (e.offsetX - margin.left - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
+    let old_svg_y = (e.offsetY - margin.top - pan_y) / (oldzoom * svgElement.clientHeight) * zoom_dif * svgElement.clientHeight;
+    pan(old_svg_x, old_svg_y, 0, 0);
+    draw();
+  }
 }
 
 function pan(x, y, new_x, new_y) {
