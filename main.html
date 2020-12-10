@@ -12,10 +12,16 @@
       <h3 class="mt-0">Interactive<br>Class Diagrams</h3>
       <div class="d-flex flex-column">
         <div id="class-count"></div>
-        <button id="load-classes-button" type="button" class="m-1">Load classes</button>
-        <button id="load-dependencies-button" type="button" class="m-1">Load dependencies</button>
+        <button id="load-classes-button" type="button" class="m-1 mt-3">Load classes</button>
+        <button id="load-dependencies-button" type="button" class="m-1 mb-3">Load dependencies</button>
+        <div class="d-flex align-items-center">
+          <div id="toggle-information-holders" class="d-flex rounded-pill toggle mr-1" data-checked="false">
+            <div class="p-2 rounded-circle bg-light"></div>
+          </div>
+          <span>Show information holders</span>
+        </div>
       </div>
-      <span class="text-muted">SET seminar<br><br>Bavo Coremans<br><br>Supervisor:<br>Michel Chaudron<br><br></span>
+      <span>SET seminar<br><br>Bavo Coremans<br><br>Supervisor:<br>Michel Chaudron<br><br></span>
     </div>
     <div class="w-100">
       <svg id="chart" class="w-100 bg-light h-100" version="1.1" xmlns="http://www.w3.org/2000/svg"></svg>

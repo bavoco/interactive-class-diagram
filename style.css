@@ -6,8 +6,10 @@ html { background-color: #333333;}
 .flex-column { flex-direction: column;}
 .justify-content-between { justify-content: space-between;}
 .align-self-stretch { align-self: stretch;}
+.align-items-center { align-items: center;}
 
-.bg-light { background-color: #dddddd;}
+.bg-light { background-color: #f8f9fa;}
+.bg-secondary { background-color: #6c757d;}
 
 .vh-100 { height: 100vh;}
 .h-100 { height: 100%;}
@@ -15,11 +17,32 @@ html { background-color: #333333;}
 .w-100{ width: 100%;}
 
 .p-2 {padding: 0.5rem;}
-
 .m-0 {margin: 0rem;}
-.m-1 {margin: 0.25rem;}
 .mt-0 {margin-top: 0rem;}
+.m-1 {margin: 0.25rem;}
+.mr-1 {margin-right: 0.25rem;}
+.mt-3 {margin-top: 1rem;}
+.mb-3 {margin-bottom: 1rem;}
 
 .overflow-hidden {overflow: hidden;}
 
 .br-1 {border-right: 1px solid black;}
+
+.rounded-circle { border-radius: 50% !important;}
+.rounded-pill { border-radius: 50rem !important;}
+
+.toggle {
+  padding: 0.2rem;
+}
+.toggle[data-checked="true"] {
+  background-color: #198754;
+}
+.toggle[data-checked="true"] > div {
+  margin-left: 1rem;
+}
+.toggle[data-checked="false"] {
+  background-color: #6c757d;
+}
+.toggle[data-checked="false"] > div {
+  margin-right: 1rem;
+}

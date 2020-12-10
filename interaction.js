@@ -11,6 +11,7 @@ let mouse_x = 0;
 let mouse_y = 0;
 let pan_x = 0;
 let pan_y = 0;
+var show_information_holders = false;
 
 function draw() {
   var svgWidth = svgElement.clientWidth;
@@ -35,7 +36,7 @@ function draw() {
   // var rects = svgElement.firstChild.getElementsByTagName("g");
 
   classes.forEach((item, i) => {
-    if (zoomlevel < 6 && item.label == "Information Holder") {
+    if (!show_information_holders && item.label == "Information Holder") {
       return;
     }
     let class_holder = document.createElementNS(ns, "g");
@@ -71,14 +72,14 @@ function draw() {
       return;
     }
     for (const [key, value] of Object.entries(item)) {
-      if (zoomlevel < 6 && classes[key].label == "Information Holder") {
+      if (!show_information_holders && classes[key].label == "Information Holder") {
         return;
       }
       let elem = document.createElementNS(ns, "line");
-      elem.setAttribute("x1", x(classes[i].x));
+      elem.setAttribute("x1", x(classes[i].x) + classWidth / 2);
       elem.setAttribute("y1", y(classes[i].y));
-      elem.setAttribute("x2", x(classes[key].x));
-      elem.setAttribute("y2", y(classes[key].y));
+      elem.setAttribute("x2", x(classes[key].x) + classWidth / 2);
+      elem.setAttribute("y2", y(classes[key].y) + classWidth);
       elem.setAttribute("stroke", "black");
       elem.setAttribute("stroke-width", .2);
       main_g.appendChild(elem);
@@ -98,7 +99,7 @@ function zoom(e) {
     let old_svg_x = (e.offsetX - margin.left - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
     let old_svg_y = (e.offsetY - margin.top - pan_y) / (oldzoom * svgElement.clientHeight) * zoom_dif * svgElement.clientHeight;
     pan(old_svg_x, old_svg_y, 0, 0);
-    draw();
+    //draw();
   }
 }
 
@@ -132,3 +133,9 @@ window.addEventListener('mouseup', e => {
     isDragging = false;
   }
 });
+
+document.getElementById('toggle-information-holders').addEventListener('click', function() {
+  show_information_holders = !show_information_holders;
+  document.getElementById('toggle-information-holders').setAttribute('data-checked', show_information_holders);
+  draw();
+}, {passive: true});
