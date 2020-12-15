@@ -12,6 +12,7 @@ let mouse_y = 0;
 let pan_x = 0;
 let pan_y = 0;
 var show_information_holders = false;
+var show_service_providers = true;
 
 function draw() {
   var svgWidth = svgElement.clientWidth;
@@ -37,6 +38,9 @@ function draw() {
 
   classes.forEach((item, i) => {
     if (!show_information_holders && item.label == "Information Holder") {
+      return;
+    }
+    if (!show_service_providers && item.label == "Service Provider") {
       return;
     }
     let class_holder = document.createElementNS(ns, "g");
@@ -68,11 +72,17 @@ function draw() {
   });
 
   dependencies.forEach((item, i) => {
-    if (zoomlevel < 6 && classes[i].label == "Information Holder") {
+    if (!show_information_holders && classes[i].label == "Information Holder") {
+      return;
+    }
+    if (!show_service_providers && classes[i].label == "Service Provider") {
       return;
     }
     for (const [key, value] of Object.entries(item)) {
       if (!show_information_holders && classes[key].label == "Information Holder") {
+        return;
+      }
+      if (!show_service_providers && classes[key].label == "Service Provider") {
         return;
       }
       let elem = document.createElementNS(ns, "line");
@@ -137,5 +147,11 @@ window.addEventListener('mouseup', e => {
 document.getElementById('toggle-information-holders').addEventListener('click', function() {
   show_information_holders = !show_information_holders;
   document.getElementById('toggle-information-holders').setAttribute('data-checked', show_information_holders);
+  draw();
+}, {passive: true});
+
+document.getElementById('toggle-service-providers').addEventListener('click', function() {
+  show_service_providers = !show_service_providers;
+  document.getElementById('toggle-service-providers').setAttribute('data-checked', show_service_providers);
   draw();
 }, {passive: true});
