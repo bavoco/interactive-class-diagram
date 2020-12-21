@@ -9,12 +9,30 @@ var roles = {
 };
 var reverse_dependencies = [];
 
+function data_init() {
+  placement();
+  getPackages();
+  draw();
+}
+
 function maxDependencies() {
 
 }
 
 function maxIncomingDependencies() {
 
+}
+
+var packagetree = {children: {}, name: 'root'};
+
+function getPackages() {
+  //let packagetree = {};
+  for (let i = 0; i < classes.length; i++) {
+    const dep = classes[i];
+    let packages = dep['dot_file_ext'].split('.');
+    addKeyToTree(packages);
+  }
+  console.log(packagetree);
 }
 
 function numClassesPerRole() {
@@ -97,4 +115,27 @@ function computeLayers() {
     i--;
   }
   return layers;
+}
+
+function keyExistsInTree(path) {
+  var currentelement = packagetree;
+  for (let index = 0; index < path.length; index++) {
+    const element = path[index];
+    currentelement = currentelement?.children[element] ?? null;
+  }
+  if (currentelement) {
+    return true;
+  }
+  return false;
+}
+
+function addKeyToTree(path) {
+  var currentelement = packagetree;
+  for (let index = 0; index < path.length; index++) {
+    const element = path[index];
+    if(currentelement.children[element] == null) {
+      currentelement.children[element] = {name: element, children: {}};
+    }
+    currentelement = currentelement.children[element];
+  }
 }

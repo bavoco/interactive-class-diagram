@@ -74,8 +74,7 @@ async function parseDepCSV(contents) {
 
 function checkifbothloaded() {
   if (classes != null && classes.length > 0 && dependencies != null && dependencies.length > 0) {
-    placement();
-    draw();
+    data_init();
   }
 }
 
