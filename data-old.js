@@ -11,7 +11,7 @@ var roles = {
   
   function data_init() {
     placement();
-    getPackages();
+    buildPackageTree();
     draw();
   }
   
@@ -25,12 +25,11 @@ var roles = {
   
   var packagetree = {children: {}, name: 'root'};
   
-  function getPackages() {
-    //let packagetree = {};
+  function buildPackageTree() {
     for (let i = 0; i < classes.length; i++) {
-      const dep = classes[i];
-      let packages = dep['dot_file_ext'].split('.');
-      addKeyToTree(packages);
+      const cla = classes[i];
+      let packages = cla['dot_file_ext'].split('.');
+      addKeyToTree(packages, cla);
     }
     console.log(packagetree);
   }
@@ -129,12 +128,16 @@ var roles = {
     return false;
   }
   
-  function addKeyToTree(path) {
+  function addKeyToTree(path, cla) {
     var currentelement = packagetree;
     for (let index = 0; index < path.length; index++) {
       const element = path[index];
       if(currentelement.children[element] == null) {
-        currentelement.children[element] = {name: element, children: {}};
+        if (index < path.length - 1) {
+          currentelement.children[element] = {name: element, children: {}};
+        } else {
+          currentelement.children[element] = {name: element, children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
+        }
       }
       currentelement = currentelement.children[element];
     }

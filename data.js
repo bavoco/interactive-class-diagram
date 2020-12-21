@@ -10,8 +10,7 @@ var roles = {
 var reverse_dependencies = [];
 
 function data_init() {
-  placement();
-  getPackages();
+  buildPackageTree();
   draw();
 }
 
@@ -25,12 +24,11 @@ function maxIncomingDependencies() {
 
 var packagetree = {children: {}, name: 'root'};
 
-function getPackages() {
-  //let packagetree = {};
+function buildPackageTree() {
   for (let i = 0; i < classes.length; i++) {
-    const dep = classes[i];
-    let packages = dep['dot_file_ext'].split('.');
-    addKeyToTree(packages);
+    const cla = classes[i];
+    let packages = cla['dot_file_ext'].split('.');
+    addKeyToTree(packages, cla);
   }
   console.log(packagetree);
 }
@@ -55,20 +53,6 @@ function getRandomPos(i) {
   let x = 50 + 50 * Math.cos(rad);
   let y = 50 + 50 * Math.sin(rad);
   return [x, y];
-}
-
-function placement() {
-  computeReverseDependencies();
-  let layers = computeLayers();
-  // classes.forEach((item, i) => {
-  //   [item.x, item.y] = getRandomPos(i);
-  // });
-  for (var i = Object.keys(layers).length; i > 0; i--) {
-    for (var j = 0; j < layers[i].length; j++) {
-      classes[layers[i][j]].x = (j * 2) % 100;
-      classes[layers[i][j]].y = i * 25 + Math.floor(j*2/100) * 3;
-    }
-  }
 }
 
 function computeReverseDependencies() {
@@ -129,12 +113,16 @@ function keyExistsInTree(path) {
   return false;
 }
 
-function addKeyToTree(path) {
+function addKeyToTree(path, cla) {
   var currentelement = packagetree;
   for (let index = 0; index < path.length; index++) {
     const element = path[index];
     if(currentelement.children[element] == null) {
-      currentelement.children[element] = {name: element, children: {}};
+      if (index < path.length - 1) {
+        currentelement.children[element] = {name: element, children: {}, expanded: false};
+      } else {
+        currentelement.children[element] = {name: element, children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
+      }
     }
     currentelement = currentelement.children[element];
   }

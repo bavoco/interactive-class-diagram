@@ -14,88 +14,145 @@ let pan_y = 0;
 var show_information_holders = false;
 var show_service_providers = true;
 
+var xscale = function(val) {
+  return 0.01 * val * width;
+}
+
+var yscale = function(val) {
+  return 0.01 * val * height;
+}
+
 function draw() {
-  var svgWidth = svgElement.clientWidth;
-  var svgHeight = svgElement.clientHeight;
+  var svgWidth = Math.max(svgElement.clientWidth, 2000);
+  var svgHeight = Math.max(svgElement.clientHeight, 2000);
   var width = svgWidth - margin.right - margin.left;
   var height = svgHeight - margin.top - margin.bottom;
-  var classWidth = 20;
 
-  svgElement.setAttribute("viewBox", [0, 0, svgWidth, svgHeight]);
+  svgElement.setAttribute("viewBox", [0, 0, svgWidth/2, svgHeight/2]);
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
 
-  var x = function(val) {
-    return 0.01 * val * width;
-  }
-
-  var y = function(val) {
-    return 0.01 * val * height;
-  }
-
   // var rects = svgElement.firstChild.getElementsByTagName("g");
+  drawRect(packagetree, 0, 0, svgWidth, svgHeight, 1, main_g);
 
-  classes.forEach((item, i) => {
-    if (!show_information_holders && item.label == "Information Holder") {
-      return;
-    }
-    if (!show_service_providers && item.label == "Service Provider") {
-      return;
-    }
-    let class_holder = document.createElementNS(ns, "g");
-    class_holder.setAttribute("transform", "translate(" + x(item.x) + "," + y(item.y) + ")");
-    main_g.appendChild(class_holder);
+  // classes.forEach((item, i) => {
+  //   if (!show_information_holders && item.label == "Information Holder") {
+  //     return;
+  //   }
+  //   if (!show_service_providers && item.label == "Service Provider") {
+  //     return;
+  //   }
+  //   let class_holder = document.createElementNS(ns, "g");
+  //   class_holder.setAttribute("transform", "translate(" + x(item.x) + "," + y(item.y) + ")");
+  //   main_g.appendChild(class_holder);
 
-    let elem = document.createElementNS(ns, "rect");
-    elem.setAttribute("width", classWidth);
-    elem.setAttribute("height", classWidth);
-    elem.setAttribute("transform", "translate(" + 0 + "," + 0 + ")");
-    elem.setAttribute("fill", roles[item.label].color);
-    class_holder.appendChild(elem);
+  //   let elem = document.createElementNS(ns, "rect");
+  //   elem.setAttribute("width", classWidth);
+  //   elem.setAttribute("height", classWidth);
+  //   elem.setAttribute("transform", "translate(" + 0 + "," + 0 + ")");
+  //   elem.setAttribute("fill", roles[item.label].color);
+  //   class_holder.appendChild(elem);
 
-    elem = document.createElementNS(ns, "text");
-    elem.setAttribute("x", classWidth/2);
-    elem.setAttribute("y", 2);
-    elem.setAttribute("font-size", 2);
-    elem.setAttribute("style", "text-anchor: middle;");
-    elem.appendChild(document.createTextNode("<<" + item.label + ">>"));
-    class_holder.appendChild(elem);
+  //   elem = document.createElementNS(ns, "text");
+  //   elem.setAttribute("x", classWidth/2);
+  //   elem.setAttribute("y", 2);
+  //   elem.setAttribute("font-size", 2);
+  //   elem.setAttribute("style", "text-anchor: middle;");
+  //   elem.appendChild(document.createTextNode("<<" + item.label + ">>"));
+  //   class_holder.appendChild(elem);
 
-    elem = document.createElementNS(ns, "text");
-    elem.setAttribute("x", classWidth/2);
-    elem.setAttribute("y", 4);
-    elem.setAttribute("font-size", 2);
-    elem.setAttribute("style", "text-anchor: middle;");
-    elem.appendChild(document.createTextNode(item.classname));
-    class_holder.appendChild(elem);
-  });
+  //   elem = document.createElementNS(ns, "text");
+  //   elem.setAttribute("x", classWidth/2);
+  //   elem.setAttribute("y", 4);
+  //   elem.setAttribute("font-size", 2);
+  //   elem.setAttribute("style", "text-anchor: middle;");
+  //   elem.appendChild(document.createTextNode(item.classname));
+  //   class_holder.appendChild(elem);
+  // });
 
-  dependencies.forEach((item, i) => {
-    if (!show_information_holders && classes[i].label == "Information Holder") {
-      return;
-    }
-    if (!show_service_providers && classes[i].label == "Service Provider") {
-      return;
-    }
-    for (const [key, value] of Object.entries(item)) {
-      if (!show_information_holders && classes[key].label == "Information Holder") {
-        return;
-      }
-      if (!show_service_providers && classes[key].label == "Service Provider") {
-        return;
-      }
-      let elem = document.createElementNS(ns, "line");
-      elem.setAttribute("x1", x(classes[i].x) + classWidth / 2);
-      elem.setAttribute("y1", y(classes[i].y));
-      elem.setAttribute("x2", x(classes[key].x) + classWidth / 2);
-      elem.setAttribute("y2", y(classes[key].y) + classWidth);
-      elem.setAttribute("stroke", "black");
-      elem.setAttribute("stroke-width", .2);
-      main_g.appendChild(elem);
-    }
-  });
+  // dependencies.forEach((item, i) => {
+  //   if (!show_information_holders && classes[i].label == "Information Holder") {
+  //     return;
+  //   }
+  //   if (!show_service_providers && classes[i].label == "Service Provider") {
+  //     return;
+  //   }
+  //   for (const [key, value] of Object.entries(item)) {
+  //     if (!show_information_holders && classes[key].label == "Information Holder") {
+  //       return;
+  //     }
+  //     if (!show_service_providers && classes[key].label == "Service Provider") {
+  //       return;
+  //     }
+  //     let elem = document.createElementNS(ns, "line");
+  //     elem.setAttribute("x1", x(classes[i].x) + classWidth / 2);
+  //     elem.setAttribute("y1", y(classes[i].y));
+  //     elem.setAttribute("x2", x(classes[key].x) + classWidth / 2);
+  //     elem.setAttribute("y2", y(classes[key].y) + classWidth);
+  //     elem.setAttribute("stroke", "black");
+  //     elem.setAttribute("stroke-width", .2);
+  //     main_g.appendChild(elem);
+  //   }
+  // });
 
+}
+
+function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
+  let new_parent = document.createElementNS(ns, "g");
+  new_parent.setAttribute("transform", "translate(" + xs + "," + ys + ")");
+  parent.appendChild(new_parent);
+  let numchildren = Object.keys(pkg.children).length; 
+  if (numchildren == 0) {
+    drawClassRect(pkg, 0, 0, xe, ye, new_parent);
+  } else if (numchildren == 1) {
+    drawPackageRect(pkg, 0, 0, xe, ye, depth, new_parent);
+    drawRect(pkg.children[Object.keys(pkg.children)[0]], 3, 3, xe-6, ye-6, depth+1, new_parent);
+  } else {
+    let size = xe / Math.ceil(Math.sqrt(numchildren));
+    Object.keys(pkg.children).forEach((key, index) => {
+      drawPackageRect(pkg, (index*size)%xe, Math.floor(index*size/xe) * size, size, size, depth, new_parent);
+      drawRect(pkg.children[key], (index*size)%xe + 3, Math.floor(index*size/xe) * size + 3, size-6, size-6, depth+1, new_parent);
+    });
+  }
+}
+
+function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
+  let packagepadding = 2;
+  let elem = document.createElementNS(ns, "rect");
+  elem.setAttribute("x", xs+packagepadding);
+  elem.setAttribute("y", ys+packagepadding);
+  elem.setAttribute("width", xe-2*packagepadding);
+  elem.setAttribute("height", ye-2*packagepadding);
+  elem.setAttribute("rx", 2);
+  elem.setAttribute("ry", 2);
+  elem.setAttribute("stroke", 'black');
+  elem.setAttribute("stroke-width", 1);
+  elem.setAttribute("fill", "transparent");
+  //elem.setAttribute("transform", "translate(" + xs+packagepadding + "," + ys+packagepadding + ")");
+  //elem.setAttribute("fill", roles[item.label].color);
+  parent.appendChild(elem);
+
+  elem = document.createElementNS(ns, "text");
+  elem.setAttribute("x", xe - packagepadding - 1);
+  elem.setAttribute("y", packagepadding + 1);
+  elem.setAttribute("font-size", 2);
+  elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
+  elem.appendChild(document.createTextNode(pkg.name));
+  parent.appendChild(elem);
+}
+
+function drawClassRect(cla, xs, ys, xe, ye, parent) {
+  var classWidth = 20;
+  let classpadding = 3;
+  let elem = document.createElementNS(ns, "rect");
+  elem.setAttribute("width", classWidth);
+  elem.setAttribute("height", classWidth);
+  elem.setAttribute("rx", 1);
+  elem.setAttribute("ry", 1);
+  elem.setAttribute("transform", "translate(" + classpadding + "," + classpadding + ")");
+  elem.setAttribute("fill", roles[cla.label].color);
+  parent.appendChild(elem);
 }
 
 function zoom(e) {
