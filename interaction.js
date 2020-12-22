@@ -111,7 +111,7 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
   } else {
     let size = xe / Math.ceil(Math.sqrt(numchildren));
     Object.keys(pkg.children).forEach((key, index) => {
-      drawPackageRect(pkg, (index*size)%xe, Math.floor(index*size/xe) * size, size, size, depth, new_parent);
+      drawPackageRect(pkg.children[key], (index*size)%xe, Math.floor(index*size/xe) * size, size, size, depth, new_parent);
       drawRect(pkg.children[key], (index*size)%xe + 3, Math.floor(index*size/xe) * size + 3, size-6, size-6, depth+1, new_parent);
     });
   }
@@ -134,8 +134,8 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", xe - packagepadding - 1);
-  elem.setAttribute("y", packagepadding + 1);
+  elem.setAttribute("x", xs + xe - 2*packagepadding - 1);
+  elem.setAttribute("y", ys + packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
   elem.appendChild(document.createTextNode(pkg.name));
@@ -143,6 +143,12 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
 }
 
 function drawClassRect(cla, xs, ys, xe, ye, parent) {
+  if (!show_information_holders && cla.label == "Information Holder") {
+    return;
+  }
+  if (!show_service_providers && cla.label == "Service Provider") {
+    return;
+  }
   var classWidth = 20;
   let classpadding = 3;
   let elem = document.createElementNS(ns, "rect");
