@@ -13,6 +13,10 @@ let pan_x = 0;
 let pan_y = 0;
 var show_information_holders = false;
 var show_service_providers = true;
+var show_structurers = true;
+var show_interfacers = true;
+var show_coordinators = true;
+var show_controllers = true;
 
 var xscale = function(val) {
   return 0.01 * val * width;
@@ -143,10 +147,13 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
 }
 
 function drawClassRect(cla, xs, ys, xe, ye, parent) {
-  if (!show_information_holders && cla.label == "Information Holder") {
-    return;
-  }
-  if (!show_service_providers && cla.label == "Service Provider") {
+  if (!show_information_holders && cla.label == "Information Holder" ||
+      !show_service_providers && cla.label == "Service Provider" ||
+      !show_controllers && cla.label == "Controller" ||
+      !show_coordinators && cla.label == "Coordinator" ||
+      !show_interfacers && cla.label == "Interfacer" ||
+      !show_structurers && cla.label == "Structurer"
+  ) {
     return;
   }
   var classWidth = 20;
@@ -216,5 +223,29 @@ document.getElementById('toggle-information-holders').addEventListener('click', 
 document.getElementById('toggle-service-providers').addEventListener('click', function() {
   show_service_providers = !show_service_providers;
   document.getElementById('toggle-service-providers').setAttribute('data-checked', show_service_providers);
+  draw();
+}, {passive: true});
+
+document.getElementById('toggle-structurers').addEventListener('click', function() {
+  show_structurers = !show_structurers;
+  document.getElementById('toggle-structurers').setAttribute('data-checked', show_structurers);
+  draw();
+}, {passive: true});
+
+document.getElementById('toggle-interfacers').addEventListener('click', function() {
+  show_interfacers = !show_interfacers;
+  document.getElementById('toggle-interfacers').setAttribute('data-checked', show_interfacers);
+  draw();
+}, {passive: true});
+
+document.getElementById('toggle-coordinators').addEventListener('click', function() {
+  show_coordinators = !show_coordinators;
+  document.getElementById('toggle-coordinators').setAttribute('data-checked', show_coordinators);
+  draw();
+}, {passive: true});
+
+document.getElementById('toggle-controllers').addEventListener('click', function() {
+  show_controllers = !show_controllers;
+  document.getElementById('toggle-controllers').setAttribute('data-checked', show_controllers);
   draw();
 }, {passive: true});
