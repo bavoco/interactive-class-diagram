@@ -138,7 +138,7 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", xs + xe - 2*packagepadding - 1);
+  elem.setAttribute("x", xs + xe - packagepadding - 1);
   elem.setAttribute("y", ys + packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
@@ -157,7 +157,7 @@ function drawClassRect(cla, xs, ys, xe, ye, parent) {
     return;
   }
   var classWidth = 20;
-  let classpadding = 3;
+  let classpadding = 1;
   let elem = document.createElementNS(ns, "rect");
   elem.setAttribute("width", classWidth);
   elem.setAttribute("height", classWidth);
@@ -165,6 +165,14 @@ function drawClassRect(cla, xs, ys, xe, ye, parent) {
   elem.setAttribute("ry", 1);
   elem.setAttribute("transform", "translate(" + classpadding + "," + classpadding + ")");
   elem.setAttribute("fill", roles[cla.label].color);
+  parent.appendChild(elem);
+
+  elem = document.createElementNS(ns, "text");
+  elem.setAttribute("x", classWidth/2 + classpadding);
+  elem.setAttribute("y", 4);
+  elem.setAttribute("font-size", 2);
+  elem.setAttribute("style", "text-anchor: middle;");
+  elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
 }
 
