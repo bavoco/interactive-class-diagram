@@ -32,7 +32,7 @@ function draw() {
   var width = svgWidth - margin.right - margin.left;
   var height = svgHeight - margin.top - margin.bottom;
 
-  svgElement.setAttribute("viewBox", [0, 0, svgWidth/2, svgHeight/2]);
+  svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
