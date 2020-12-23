@@ -18,14 +18,6 @@ var show_interfacers = true;
 var show_coordinators = true;
 var show_controllers = true;
 
-var xscale = function(val) {
-  return 0.01 * val * width;
-}
-
-var yscale = function(val) {
-  return 0.01 * val * height;
-}
-
 function draw() {
   var svgWidth = Math.max(svgElement.clientWidth, 2000);
   var svgHeight = Math.max(svgElement.clientHeight, 2000);
@@ -103,31 +95,32 @@ function draw() {
 }
 
 function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
-  let new_parent = document.createElementNS(ns, "g");
-  new_parent.setAttribute("transform", "translate(" + xs + "," + ys + ")");
-  parent.appendChild(new_parent);
+  //let new_parent = document.createElementNS(ns, "g");
+  //new_parent.setAttribute("transform", "translate(" + xs + "," + ys + ")");
+  //parent.appendChild(new_parent);
   let numchildren = Object.keys(pkg.children).length; 
   if (numchildren == 0) {
-    drawClassRect(pkg, 0, 0, xe, ye, new_parent);
-  } else if (numchildren == 1) {
-    drawPackageRect(pkg, 0, 0, xe, ye, depth, new_parent);
-    drawRect(pkg.children[Object.keys(pkg.children)[0]], 3, 3, xe-6, ye-6, depth+1, new_parent);
+    drawClassRect(pkg, 0, 0, xe, ye, depth, parent);
+  //} else if (numchildren == 1) {
+    //drawPackageRect(pkg, 0, 0, xe, ye, depth, parent);
+    //drawRect(pkg.children[Object.keys(pkg.children)[0]], 3, 3, xe-6, ye-6, depth+1, parent);
   } else {
-    let size = xe / Math.ceil(Math.sqrt(numchildren));
+    drawPackageRect(pkg, 0, 0, 0, 0, depth, parent);
+    //let size = xe / Math.ceil(Math.sqrt(numchildren));
     Object.keys(pkg.children).forEach((key, index) => {
-      drawPackageRect(pkg.children[key], (index*size)%xe, Math.floor(index*size/xe) * size, size, size, depth, new_parent);
-      drawRect(pkg.children[key], (index*size)%xe + 3, Math.floor(index*size/xe) * size + 3, size-6, size-6, depth+1, new_parent);
+      drawRect(pkg.children[key], 0, 0, 0, 0, depth+1, parent);
     });
   }
 }
 
 function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
+  let packagewidth = 20;
   let packagepadding = 2;
   let elem = document.createElementNS(ns, "rect");
-  elem.setAttribute("x", xs+packagepadding);
-  elem.setAttribute("y", ys+packagepadding);
-  elem.setAttribute("width", xe-2*packagepadding);
-  elem.setAttribute("height", ye-2*packagepadding);
+  elem.setAttribute("x", pkg.x);
+  elem.setAttribute("y", depth*30);
+  elem.setAttribute("width", packagewidth);
+  elem.setAttribute("height", packagewidth);
   elem.setAttribute("rx", 2);
   elem.setAttribute("ry", 2);
   elem.setAttribute("stroke", 'black');
@@ -138,15 +131,15 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", xs + xe - packagepadding - 1);
-  elem.setAttribute("y", ys + packagepadding + 1);
+  elem.setAttribute("x", pkg.x + packagewidth - packagepadding - 1);
+  elem.setAttribute("y", depth*30 + packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
   elem.appendChild(document.createTextNode(pkg.name));
   parent.appendChild(elem);
 }
 
-function drawClassRect(cla, xs, ys, xe, ye, parent) {
+function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
   if (!show_information_holders && cla.label == "Information Holder" ||
       !show_service_providers && cla.label == "Service Provider" ||
       !show_controllers && cla.label == "Controller" ||
@@ -163,13 +156,13 @@ function drawClassRect(cla, xs, ys, xe, ye, parent) {
   elem.setAttribute("height", classWidth);
   elem.setAttribute("rx", 1);
   elem.setAttribute("ry", 1);
-  elem.setAttribute("transform", "translate(" + classpadding + "," + classpadding + ")");
+  elem.setAttribute("transform", "translate(" + cla.x + "," + depth*30 + ")");
   elem.setAttribute("fill", roles[cla.label].color);
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", classWidth/2 + classpadding);
-  elem.setAttribute("y", 4);
+  elem.setAttribute("x", cla.x + classWidth/2 + classpadding);
+  elem.setAttribute("y", depth*30 + 4);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: middle;");
   elem.appendChild(document.createTextNode(cla.name));

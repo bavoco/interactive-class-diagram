@@ -11,6 +11,7 @@ var reverse_dependencies = [];
 
 function data_init() {
   buildPackageTree();
+  placement();
   draw();
 }
 
@@ -26,9 +27,7 @@ var packagetree = {children: {}, name: 'root'};
 
 function buildPackageTree() {
   for (let i = 0; i < classes.length; i++) {
-    const cla = classes[i];
-    let packages = cla['dot_file_ext'].split('.');
-    addKeyToTree(packages, cla);
+    addKeyToTree(classes[i]);
   }
   console.log(packagetree);
 }
@@ -48,11 +47,28 @@ function numClassesPerRole() {
   }
 }
 
-function getRandomPos(i) {
-  let rad = 2*Math.PI / classes.length * i;
-  let x = 50 + 50 * Math.cos(rad);
-  let y = 50 + 50 * Math.sin(rad);
-  return [x, y];
+function placement() {
+  calcLeaves(packagetree, 0);
+}
+
+function calcLeaves(pkg, x) {
+  let numchildren = Object.keys(pkg.children).length;
+  if (numchildren == 0) {
+    pkg.leaves = 0
+    pkg.x = x;
+    return 1;
+  }
+  let totlvs = 0;
+  let lvs = 0;
+  pkg.x = x;
+  Object.keys(pkg.children).forEach((key, index) => {
+    lvs = calcLeaves(pkg.children[key], x);
+    x += lvs*20;
+    totlvs += lvs;
+  });
+  pkg.leaves = totlvs;
+  pkg.x = pkg.x + (totlvs-1)*10;
+  return totlvs;
 }
 
 function computeReverseDependencies() {
@@ -113,16 +129,19 @@ function keyExistsInTree(path) {
   return false;
 }
 
-function addKeyToTree(path, cla) {
+function addKeyToTree(cla) {
+  let path = cla['dot_file_ext'].split('.');
   var currentelement = packagetree;
   for (let index = 0; index < path.length; index++) {
     const element = path[index];
-    if(currentelement.children[element] == null) {
+    if(!Object.keys(currentelement.children).includes(element)) {
       if (index < path.length - 1) {
         currentelement.children[element] = {name: element, children: {}, expanded: false};
       } else {
+        //console.log('hier');
         currentelement.children[element] = {name: element, children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
       }
+      console.log('there');
     }
     currentelement = currentelement.children[element];
   }
