@@ -117,7 +117,7 @@ function addKeyToTree(path, cla) {
   var currentelement = packagetree;
   for (let index = 0; index < path.length; index++) {
     const element = path[index];
-    if(currentelement.children[element] == null) {
+    if(!Object.keys(currentelement.children).includes(element)) {
       if (index < path.length - 1) {
         currentelement.children[element] = {name: element, children: {}, expanded: false};
       } else {

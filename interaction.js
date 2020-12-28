@@ -109,13 +109,10 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
   let numchildren = Object.keys(pkg.children).length; 
   if (numchildren == 0) {
     drawClassRect(pkg, 0, 0, xe, ye, new_parent);
-  } else if (numchildren == 1) {
-    drawPackageRect(pkg, 0, 0, xe, ye, depth, new_parent);
-    drawRect(pkg.children[Object.keys(pkg.children)[0]], 3, 3, xe-6, ye-6, depth+1, new_parent);
   } else {
     let size = xe / Math.ceil(Math.sqrt(numchildren));
+    drawPackageRect(pkg, 0, 0, xe, ye, depth, new_parent);
     Object.keys(pkg.children).forEach((key, index) => {
-      drawPackageRect(pkg.children[key], (index*size)%xe, Math.floor(index*size/xe) * size, size, size, depth, new_parent);
       drawRect(pkg.children[key], (index*size)%xe + 3, Math.floor(index*size/xe) * size + 3, size-6, size-6, depth+1, new_parent);
     });
   }
