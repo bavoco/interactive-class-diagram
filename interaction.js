@@ -31,6 +31,7 @@ function draw() {
 
   // var rects = svgElement.firstChild.getElementsByTagName("g");
   drawRect(packagetree, 0, 0, svgWidth, svgHeight, 1, main_g);
+  drawPackageLines();
 
   // classes.forEach((item, i) => {
   //   if (!show_information_holders && item.label == "Information Holder") {
@@ -115,10 +116,10 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
 
 function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   let packagewidth = 20;
-  let packagepadding = 2;
+  let packagepadding = 0;
   let elem = document.createElementNS(ns, "rect");
   elem.setAttribute("x", pkg.x);
-  elem.setAttribute("y", depth*30);
+  elem.setAttribute("y", pkg.y);
   elem.setAttribute("width", packagewidth);
   elem.setAttribute("height", packagewidth);
   elem.setAttribute("rx", 2);
@@ -132,7 +133,7 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
 
   elem = document.createElementNS(ns, "text");
   elem.setAttribute("x", pkg.x + packagewidth - packagepadding - 1);
-  elem.setAttribute("y", depth*30 + packagepadding + 1);
+  elem.setAttribute("y", pkg.y + packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
   elem.appendChild(document.createTextNode(pkg.name));
@@ -150,23 +151,41 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
     return;
   }
   var classWidth = 20;
-  let classpadding = 1;
+  let classpadding = 0;
   let elem = document.createElementNS(ns, "rect");
   elem.setAttribute("width", classWidth);
   elem.setAttribute("height", classWidth);
   elem.setAttribute("rx", 1);
   elem.setAttribute("ry", 1);
-  elem.setAttribute("transform", "translate(" + cla.x + "," + depth*30 + ")");
+  elem.setAttribute("transform", "translate(" + cla.x + "," + cla.y + ")");
   elem.setAttribute("fill", roles[cla.label].color);
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
   elem.setAttribute("x", cla.x + classWidth/2 + classpadding);
-  elem.setAttribute("y", depth*30 + 4);
+  elem.setAttribute("y", cla.y + 4);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: middle;");
   elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
+}
+
+function drawPackageLines() {
+  package_lines.forEach((item, index) => {
+    drawDottedLine(item.x1, item.y1, item.x2, item.y2);
+  });
+}
+
+function drawDottedLine(x1, y1, x2, y2) {
+  elem = document.createElementNS(ns, "line");
+  elem.setAttribute("x1", x1);
+  elem.setAttribute("y1", y1);
+  elem.setAttribute("x2", x2);
+  elem.setAttribute("y2", y2);
+  elem.setAttribute("stroke", "black");
+  elem.setAttribute("stroke-width", .5);
+  elem.setAttribute("stroke-dasharray", 4);
+  main_g.appendChild(elem);
 }
 
 function zoom(e) {

@@ -8,6 +8,7 @@ var roles = {
   "Structurer": {color: "#B64991"}
 };
 var reverse_dependencies = [];
+var package_lines = [];
 
 function data_init() {
   buildPackageTree();
@@ -48,27 +49,62 @@ function numClassesPerRole() {
 }
 
 function placement() {
-  calcLeaves(packagetree, 0);
+  calcLeaves2(packagetree, 0, 0, 0, 30, 0);
 }
 
-function calcLeaves(pkg, x) {
+// function calcLeaves(pkg, x, y, depth) {
+//   let numchildren = Object.keys(pkg.children).length;
+//   if (numchildren == 0) {
+//     pkg.leaves = 0;
+//     pkg.x = x;
+//     pkg.y = y;
+//     return [1, 0];
+//   }
+//   let totlvs = 0;
+//   let lvs = 0;
+//   pkg.x = x;
+//   pkg.y = y;
+//   let size = Math.ceil(Math.sqrt(numchildren));
+//   Object.keys(pkg.children).forEach((key, index) => {
+//     [lvs, size_x] = calcLeaves(pkg.children[key], x, y, depth + 1);
+//     x = pkg.x + ((index*size_x)%size) * 20;
+//     y = pkg.y + (1);
+//     totlvs += lvs;
+//   });
+//   pkg.leaves = totlvs;
+//   pkg.x = pkg.x + (totlvs-1)*10;
+//   return [totlvs, size];
+// }
+
+function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
+  pkg.x = x;
+  pkg.y = y;
   let numchildren = Object.keys(pkg.children).length;
   if (numchildren == 0) {
-    pkg.leaves = 0
-    pkg.x = x;
-    return 1;
+    pkg.leaves = 0;
+    return [1, n_x];
   }
+  let size = Math.ceil(Math.sqrt(numchildren));
   let totlvs = 0;
   let lvs = 0;
-  pkg.x = x;
+  let size_x = 0;
+  let nn_y = n_y + size * 21 + 10;
+  let nn_x = n_x;
   Object.keys(pkg.children).forEach((key, index) => {
-    lvs = calcLeaves(pkg.children[key], x);
-    x += lvs*20;
+    x = n_x + (index%size) * 21;
+    y = n_y + Math.floor(index/size) * 21;
+    if (index == 0){
+      package_lines.push({x1: pkg.x+10, y1: pkg.y+20, x2: x, y2: y});
+    }
+    [lvs, size_x] = calcLeaves2(pkg.children[key], x, y, nn_x, nn_y, depth + 1);
+    nn_x += size_x - nn_x;
     totlvs += lvs;
   });
   pkg.leaves = totlvs;
-  pkg.x = pkg.x + (totlvs-1)*10;
-  return totlvs;
+  //pkg.x = (size_x_tot-pkg.x)/2 + pkg.x;
+  let returnval = Math.max(n_x + (size*21), nn_x) + 10;
+  console.log(returnval);
+  return [totlvs, returnval];
 }
 
 function computeReverseDependencies() {
