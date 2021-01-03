@@ -103,7 +103,7 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
   pkg.leaves = totlvs;
   //pkg.x = (size_x_tot-pkg.x)/2 + pkg.x;
   let returnval = Math.max(n_x + (size*21), nn_x) + 10;
-  console.log(returnval);
+  //console.log(returnval);
   return [totlvs, returnval];
 }
 
@@ -177,8 +177,30 @@ function addKeyToTree(cla) {
         //console.log('hier');
         currentelement.children[element] = {name: element, children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
       }
-      console.log('there');
+      //console.log('there');
     }
     currentelement = currentelement.children[element];
   }
+}
+
+function findIdInTree(id) {
+  return findIdInSubtree(packagetree, id);
+}
+
+function findIdInSubtree(pkg, id) {
+  if (Object.keys(pkg).includes('id')) {
+    if (pkg.id == id) {
+      return pkg;
+    } else {
+      return null;
+    }
+  }
+  let foundpkg = null;
+  let i = 0;
+  let keys = Object.keys(pkg.children);
+  while (foundpkg == null && i < keys.length) {
+    foundpkg = findIdInSubtree(pkg.children[keys[i]], id);
+    i++;
+  }
+  return foundpkg;
 }

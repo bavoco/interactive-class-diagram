@@ -32,6 +32,7 @@ function draw() {
   // var rects = svgElement.firstChild.getElementsByTagName("g");
   drawRect(packagetree, 0, 0, svgWidth, svgHeight, 1, main_g);
   drawPackageLines();
+  drawDependecies();
 
   // classes.forEach((item, i) => {
   //   if (!show_information_holders && item.label == "Information Holder") {
@@ -66,31 +67,6 @@ function draw() {
   //   elem.setAttribute("style", "text-anchor: middle;");
   //   elem.appendChild(document.createTextNode(item.classname));
   //   class_holder.appendChild(elem);
-  // });
-
-  // dependencies.forEach((item, i) => {
-  //   if (!show_information_holders && classes[i].label == "Information Holder") {
-  //     return;
-  //   }
-  //   if (!show_service_providers && classes[i].label == "Service Provider") {
-  //     return;
-  //   }
-  //   for (const [key, value] of Object.entries(item)) {
-  //     if (!show_information_holders && classes[key].label == "Information Holder") {
-  //       return;
-  //     }
-  //     if (!show_service_providers && classes[key].label == "Service Provider") {
-  //       return;
-  //     }
-  //     let elem = document.createElementNS(ns, "line");
-  //     elem.setAttribute("x1", x(classes[i].x) + classWidth / 2);
-  //     elem.setAttribute("y1", y(classes[i].y));
-  //     elem.setAttribute("x2", x(classes[key].x) + classWidth / 2);
-  //     elem.setAttribute("y2", y(classes[key].y) + classWidth);
-  //     elem.setAttribute("stroke", "black");
-  //     elem.setAttribute("stroke-width", .2);
-  //     main_g.appendChild(elem);
-  //   }
   // });
 
 }
@@ -177,7 +153,7 @@ function drawPackageLines() {
 }
 
 function drawDottedLine(x1, y1, x2, y2) {
-  elem = document.createElementNS(ns, "line");
+  let elem = document.createElementNS(ns, "line");
   elem.setAttribute("x1", x1);
   elem.setAttribute("y1", y1);
   elem.setAttribute("x2", x2);
@@ -185,6 +161,52 @@ function drawDottedLine(x1, y1, x2, y2) {
   elem.setAttribute("stroke", "black");
   elem.setAttribute("stroke-width", .5);
   elem.setAttribute("stroke-dasharray", 4);
+  main_g.appendChild(elem);
+}
+
+function drawDependecies() {
+  dependencies.forEach((item, i) => {
+    if (!show_information_holders && classes[i].label == "Information Holder" ||
+      !show_service_providers && classes[i].label == "Service Provider" ||
+      !show_controllers && classes[i].label == "Controller" ||
+      !show_coordinators && classes[i].label == "Coordinator" ||
+      !show_interfacers && classes[i].label == "Interfacer" ||
+      !show_structurers && classes[i].label == "Structurer") {
+      return;
+    }
+    let pkg1 = findIdInTree(i);
+    if (pkg1 == null) {
+      console.log(i);
+    } else {
+      for (const [key, value] of Object.entries(item)) {
+        if (!show_information_holders && classes[key].label == "Information Holder" ||
+          !show_service_providers && classes[key].label == "Service Provider" ||
+          !show_controllers && classes[key].label == "Controller" ||
+          !show_coordinators && classes[key].label == "Coordinator" ||
+          !show_interfacers && classes[key].label == "Interfacer" ||
+          !show_structurers && classes[key].label == "Structurer") {
+          return;
+        }
+        let pkg2 = findIdInTree(key);
+        if (pkg2 == null) {
+          console.log(key);
+        } else {
+          drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
+        }
+        
+      }
+    }
+  });
+}
+
+function drawDependecie(x1, y1, x2, y2) {
+  let elem = document.createElementNS(ns, "line");
+  elem.setAttribute("x1", x1);
+  elem.setAttribute("y1", y1);
+  elem.setAttribute("x2", x2);
+  elem.setAttribute("y2", y2);
+  elem.setAttribute("stroke", "black");
+  elem.setAttribute("stroke-width", .2);
   main_g.appendChild(elem);
 }
 
