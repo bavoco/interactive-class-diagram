@@ -85,10 +85,14 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
 }
 
 function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
+  let elem = document.createElementNS(ns, "g");
+  elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
+  elem.setAttribute("onmouseenter", "enlarge(this)");
+  elem.setAttribute("onmouseleave", "reduce(this)");
+  parent = parent.appendChild(elem);
+
   let packagepadding = 0;
-  let elem = document.createElementNS(ns, "rect");
-  elem.setAttribute("x", pkg.x);
-  elem.setAttribute("y", pkg.y);
+  elem = document.createElementNS(ns, "rect");
   elem.setAttribute("width", classWidth);
   elem.setAttribute("height", classWidth);
   elem.setAttribute("rx", 2);
@@ -101,8 +105,8 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", pkg.x + classWidth - packagepadding - 1);
-  elem.setAttribute("y", pkg.y + packagepadding + 1);
+  elem.setAttribute("x", classWidth - packagepadding - 1);
+  elem.setAttribute("y", packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
   elem.appendChild(document.createTextNode(pkg.name));
@@ -119,23 +123,38 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
   ) {
     return;
   }
+  let elem = document.createElementNS(ns, "g");
+  elem.setAttribute("transform", "translate(" + cla.x + "," + cla.y + ")");
+  elem.setAttribute("onmouseenter", "enlarge(this)");
+  elem.setAttribute("onmouseleave", "reduce(this)");
+  parent = parent.appendChild(elem);
+
   let classpadding = 0;
-  let elem = document.createElementNS(ns, "rect");
+  elem = document.createElementNS(ns, "rect");
   elem.setAttribute("width", classWidth);
   elem.setAttribute("height", classWidth);
   elem.setAttribute("rx", 1);
   elem.setAttribute("ry", 1);
-  elem.setAttribute("transform", "translate(" + cla.x + "," + cla.y + ")");
   elem.setAttribute("fill", roles[cla.label].color);
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", cla.x + classWidth/2 + classpadding);
-  elem.setAttribute("y", cla.y + 4);
+  elem.setAttribute("x", classWidth/2 + classpadding);
+  elem.setAttribute("y", 4);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: middle;");
   elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
+}
+
+function enlarge(elem) {
+  let content = elem.getAttribute('transform');
+  elem.setAttribute('transform', content+"scale(5)");
+}
+
+function reduce(elem) {
+  let content = elem.getAttribute('transform');
+  elem.setAttribute('transform', content.replace('scale(5)', ''));
 }
 
 function drawPackageLines() {
