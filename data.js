@@ -22,6 +22,7 @@ function buildPackageTree() {
   for (let i = 0; i < classes.length; i++) {
     addKeyToTree(classes[i]);
   }
+  giveAllPackagesAnId();
   console.log(packagetree);
 }
 
@@ -41,14 +42,17 @@ function numClassesPerRole() {
 }
 
 function placement() {
-  calcLeaves2(packagetree, 0, 0, 0, 30, 0);
+  let max_x = 0;
+  let lvs = 0;
+  [lvs, max_x] = calcLeaves2(packagetree, 0, 0, 0, 30, 0);
+  packagetree.x = max_x / 2;
 }
 
 function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
-  if (Object.keys(pkg).includes('id')) {
-    classes[pkg.id].x = x;
-    classes[pkg.id].y = y;
-  }
+  // if (Object.keys(pkg).includes('id') && pkg.id <= classes.length) {
+  //   classes[pkg.id].x = x;
+  //   classes[pkg.id].y = y;
+  // }
   pkg.x = x;
   pkg.y = y;
   let numchildren = Object.keys(pkg.children).length;
@@ -67,15 +71,21 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
     x = n_x + (index%size) * 21;
     y = n_y + Math.floor(index/size) * 21;
     if (index == 0){
-      package_lines.push({x1: pkg.x+10, y1: pkg.y+20, x2: x, y2: y});
+      package_lines.push({parent: pkg.id, child: pkg.children[key].id});
     }
     [lvs, size_x] = calcLeaves2(pkg.children[key], x, y, nn_x, nn_y, depth + 1);
     nn_x += size_x - nn_x;
     totlvs += lvs;
   });
-  pkg.leaves = totlvs;
-  //pkg.x = (size_x_tot-pkg.x)/2 + pkg.x;
   let returnval = Math.max(n_x + (size*21), nn_x) + 10;
+  Object.keys(pkg.children).forEach((key, index) => {
+    pkg.children[key].x = (returnval-n_x) / 2 + pkg.children[key].x;
+    // if (Object.keys(pkg.children[key]).includes('id') && pkg.id <= classes.length) {
+    //   classes[pkg.children[key].id].x = pkg.children[key].x;
+    // }
+  });
+  pkg.leaves = totlvs;
+  //pkg.x = ((returnval-pkg.x) / 2) + pkg.x;
   //console.log(returnval);
   return [totlvs, returnval];
 }
@@ -117,12 +127,8 @@ function findIdInTree(id) {
 }
 
 function findIdInSubtree(pkg, id) {
-  if (Object.keys(pkg).includes('id')) {
-    if (pkg.id == id) {
-      return pkg;
-    } else {
-      return null;
-    }
+  if (pkg.id == id) {
+    return pkg;
   }
   let foundpkg = null;
   let i = 0;
@@ -132,4 +138,20 @@ function findIdInSubtree(pkg, id) {
     i++;
   }
   return foundpkg;
+}
+
+function giveAllPackagesAnId() {
+  let nextid = classes.length + 1;
+  giveAllSubPackagesAnId(packagetree, nextid);
+}
+
+function giveAllSubPackagesAnId(pkg, nextid) {
+  if (!Object.keys(pkg).includes('id')) {
+    pkg.id = nextid;
+    nextid++;
+  }
+  Object.keys(pkg.children).forEach((key, index) => {
+    nextid = giveAllSubPackagesAnId(pkg.children[key], nextid);
+  });
+  return nextid;
 }

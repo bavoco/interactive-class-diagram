@@ -148,7 +148,9 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
 
 function drawPackageLines() {
   package_lines.forEach((item, index) => {
-    drawDottedLine(item.x1, item.y1, item.x2, item.y2);
+    let pkg1 = findIdInTree(item.parent);
+    let pkg2 = findIdInTree(item.child);
+    drawDottedLine(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
   });
 }
 
@@ -174,6 +176,7 @@ function drawDependecies() {
       !show_structurers && classes[i].label == "Structurer") {
       return;
     }
+    let pkg1 = findIdInTree(i);
     for (const [key, value] of Object.entries(item)) {
       if (!show_information_holders && classes[key].label == "Information Holder" ||
         !show_service_providers && classes[key].label == "Service Provider" ||
@@ -183,7 +186,8 @@ function drawDependecies() {
         !show_structurers && classes[key].label == "Structurer") {
         return;
       }
-      drawDependecie(classes[i].x, classes[i].y, classes[key].x, classes[key].y);
+      let pkg2 = findIdInTree(key);
+      drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
     }
   });
 }
