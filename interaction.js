@@ -85,13 +85,12 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
 }
 
 function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
-  let packagewidth = 20;
   let packagepadding = 0;
   let elem = document.createElementNS(ns, "rect");
   elem.setAttribute("x", pkg.x);
   elem.setAttribute("y", pkg.y);
-  elem.setAttribute("width", packagewidth);
-  elem.setAttribute("height", packagewidth);
+  elem.setAttribute("width", classWidth);
+  elem.setAttribute("height", classWidth);
   elem.setAttribute("rx", 2);
   elem.setAttribute("ry", 2);
   elem.setAttribute("stroke", 'black');
@@ -102,7 +101,7 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
-  elem.setAttribute("x", pkg.x + packagewidth - packagepadding - 1);
+  elem.setAttribute("x", pkg.x + classWidth - packagepadding - 1);
   elem.setAttribute("y", pkg.y + packagepadding + 1);
   elem.setAttribute("font-size", 2);
   elem.setAttribute("style", "text-anchor: end; alignment-baseline: hanging;");
@@ -120,7 +119,6 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
   ) {
     return;
   }
-  var classWidth = 20;
   let classpadding = 0;
   let elem = document.createElementNS(ns, "rect");
   elem.setAttribute("width", classWidth);
@@ -144,7 +142,7 @@ function drawPackageLines() {
   package_lines.forEach((item, index) => {
     let pkg1 = findIdInTree(item.parent);
     let pkg2 = findIdInTree(item.child);
-    drawDottedLine(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
+    drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, pkg2.x + classWidth / 2, pkg2.y);
   });
 }
 
@@ -155,7 +153,7 @@ function drawDottedLine(x1, y1, x2, y2) {
   elem.setAttribute("x2", x2);
   elem.setAttribute("y2", y2);
   elem.setAttribute("stroke", "black");
-  elem.setAttribute("stroke-width", .5);
+  elem.setAttribute("stroke-width", .2);
   elem.setAttribute("stroke-dasharray", 4);
   main_g.appendChild(elem);
 }
@@ -194,10 +192,10 @@ function drawDependecie(x1, y1, x2, y2, depval) {
     return;
   }
   let elem = document.createElementNS(ns, "line");
-  elem.setAttribute("x1", x1);
+  elem.setAttribute("x1", x1 + classWidth / 2);
   elem.setAttribute("y1", y1);
-  elem.setAttribute("x2", x2);
-  elem.setAttribute("y2", y2);
+  elem.setAttribute("x2", x2 + classWidth / 2);
+  elem.setAttribute("y2", y2 + classWidth);
   elem.setAttribute("stroke", "black");
   elem.setAttribute("stroke-width", .2);
   main_g.appendChild(elem);
