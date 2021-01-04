@@ -16,7 +16,7 @@ function data_init() {
   draw();
 }
 
-var packagetree = {children: {}, name: 'root'};
+var packagetree = {children: {}, name: 'root', expanded: true};
 
 function buildPackageTree() {
   for (let i = 0; i < classes.length; i++) {

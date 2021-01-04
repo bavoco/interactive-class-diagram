@@ -45,11 +45,18 @@
           </div>
           <span>Coordinators</span>
         </div>
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center mb-3">
           <div id="toggle-controllers" class="d-flex rounded-pill toggle mr-1" data-checked="true">
             <div class="p-2 rounded-circle bg-light"></div>
           </div>
           <span>Controllers</span>
+        </div>
+        <div>
+          Show untill depth:
+          <div class="d-flex">
+            <input type="range" id="slider-depth" min="0" max="10" step="1" value="10">
+            <output id="slider-depth-output" for="slider-depth">10</output>
+          </div>
         </div>
       </div>
       <span>SET seminar<br>Bavo Coremans<br><br>Supervisor:<br>Michel Chaudron<br></span>
@@ -57,7 +64,6 @@
     <div class="w-100">
       <svg id="chart" class="w-100 bg-light h-100" version="1.1" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
-    <!-- <script src="node_modules/d3/dist/d3.min.js"></script> -->
     <script src="new_version_class_reference_20180726.csv.js"></script>
     <script src="new_version_dependency_matrix_20180726.csv.js"></script>
     <script src="data.js"></script>

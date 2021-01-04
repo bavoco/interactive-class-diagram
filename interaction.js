@@ -16,6 +16,7 @@ var show_interfacers = true;
 var show_coordinators = true;
 var show_controllers = true;
 var classWidth = 20;
+var depth_slider_val = 10;
 
 function draw() {
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
@@ -24,7 +25,7 @@ function draw() {
   }
 
   // var rects = svgElement.firstChild.getElementsByTagName("g");
-  drawRect(packagetree, 0, 0, 0, 0, 1, main_g);
+  drawRects(packagetree, 0, 0, 0, 0, 1, main_g);
   drawPackageLines();
   drawDependecies();
 
@@ -65,7 +66,7 @@ function draw() {
 
 }
 
-function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
+function drawRects(pkg, xs, ys, xe, ye, depth, parent) {
   //let new_parent = document.createElementNS(ns, "g");
   //new_parent.setAttribute("transform", "translate(" + xs + "," + ys + ")");
   //parent.appendChild(new_parent);
@@ -78,9 +79,11 @@ function drawRect(pkg, xs, ys, xe, ye, depth, parent) {
   } else {
     drawPackageRect(pkg, 0, 0, 0, 0, depth, parent);
     //let size = xe / Math.ceil(Math.sqrt(numchildren));
-    Object.keys(pkg.children).forEach((key, index) => {
-      drawRect(pkg.children[key], 0, 0, 0, 0, depth+1, parent);
-    });
+    if (pkg.expanded && depth_slider_val >= depth) {
+      Object.keys(pkg.children).forEach((key, index) => {
+        drawRects(pkg.children[key], 0, 0, 0, 0, depth+1, parent);
+      });
+    }
   }
 }
 
@@ -89,6 +92,7 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
   elem.setAttribute("onmouseenter", "enlarge(this)");
   elem.setAttribute("onmouseleave", "reduce(this)");
+  elem.setAttribute("onclick", "toggleExpanded("+pkg.id+")");
   parent = parent.appendChild(elem);
 
   let packagepadding = 0;
@@ -160,6 +164,12 @@ function enlarge(elem) {
 function reduce(elem) {
   let content = elem.getAttribute('transform');
   elem.setAttribute('transform', content.replace('scale(5)', ''));
+}
+
+function toggleExpanded(id) {
+  pkg = findIdInTree(id);
+  pkg.expanded = !pkg.expanded;
+  draw();
 }
 
 function drawPackageLines() {
@@ -311,3 +321,9 @@ document.getElementById('toggle-controllers').addEventListener('click', function
   document.getElementById('toggle-controllers').setAttribute('data-checked', show_controllers);
   draw();
 }, {passive: true});
+
+document.getElementById('slider-depth').addEventListener('input', function() {
+  depth_slider_val = document.getElementById('slider-depth').value;
+  document.getElementById('slider-depth-output').textContent = depth_slider_val;
+  draw();
+}, {passige: true});
