@@ -56,11 +56,12 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
     pkg.leaves = 0;
     return [1, n_x];
   }
-  let size = Math.ceil(Math.sqrt(numchildren));
+  let size = Math.floor(Math.ceil(Math.sqrt(numchildren)/2));
+  let size_y = Math.ceil(Math.sqrt(numchildren)) * 2;
   let totlvs = 0;
   let lvs = 0;
   let size_x = 0;
-  let nn_y = n_y + size * 21 + 10;
+  let nn_y = n_y + size_y * 21 + 10;
   let nn_x = n_x;
   Object.keys(pkg.children).forEach((key, index) => {
     x = n_x + (index%size) * 21;
