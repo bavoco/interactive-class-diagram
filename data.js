@@ -16,14 +16,6 @@ function data_init() {
   draw();
 }
 
-function maxDependencies() {
-
-}
-
-function maxIncomingDependencies() {
-
-}
-
 var packagetree = {children: {}, name: 'root'};
 
 function buildPackageTree() {
@@ -52,31 +44,11 @@ function placement() {
   calcLeaves2(packagetree, 0, 0, 0, 30, 0);
 }
 
-// function calcLeaves(pkg, x, y, depth) {
-//   let numchildren = Object.keys(pkg.children).length;
-//   if (numchildren == 0) {
-//     pkg.leaves = 0;
-//     pkg.x = x;
-//     pkg.y = y;
-//     return [1, 0];
-//   }
-//   let totlvs = 0;
-//   let lvs = 0;
-//   pkg.x = x;
-//   pkg.y = y;
-//   let size = Math.ceil(Math.sqrt(numchildren));
-//   Object.keys(pkg.children).forEach((key, index) => {
-//     [lvs, size_x] = calcLeaves(pkg.children[key], x, y, depth + 1);
-//     x = pkg.x + ((index*size_x)%size) * 20;
-//     y = pkg.y + (1);
-//     totlvs += lvs;
-//   });
-//   pkg.leaves = totlvs;
-//   pkg.x = pkg.x + (totlvs-1)*10;
-//   return [totlvs, size];
-// }
-
 function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
+  if (Object.keys(pkg).includes('id')) {
+    classes[pkg.id].x = x;
+    classes[pkg.id].y = y;
+  }
   pkg.x = x;
   pkg.y = y;
   let numchildren = Object.keys(pkg.children).length;
@@ -118,68 +90,24 @@ function computeReverseDependencies() {
   }
 }
 
-function computeLayers() {
-  let layers = {};
-  let layer_classes = [];
-  for (var i = 0; i < dependencies.length; i++) {
-    if (Object.keys(reverse_dependencies[i]).length == 0 && Object.keys(dependencies[i]).length == 0) {
-      layer_classes.push(i);
-    }
-  }
-  layers[9] = layer_classes;
-  layer_classes = [];
-  for (var i = 0; i < dependencies.length; i++) {
-    if (!layers[9].includes(i)) {
-      layer_classes.push(i);
-    }
-  }
-  layers[8] = [];
-  i = 7;
-  while (layer_classes.length > 0) {
-    next_layer_classes = [];
-    for (var j = 0; j < layer_classes.length; j++) {
-      for (const [key, value] of Object.entries(dependencies[layer_classes[j]])) {
-        let index = layer_classes.indexOf(parseInt(key));
-        if (index > 0) {
-          layer_classes.splice(index, 1);
-          next_layer_classes.push(parseInt(key));
-        }
-      }
-    }
-    layers[eval(i)] = layer_classes;
-    layer_classes = next_layer_classes;
-    i--;
-  }
-  return layers;
-}
-
-function keyExistsInTree(path) {
-  var currentelement = packagetree;
-  for (let index = 0; index < path.length; index++) {
-    const element = path[index];
-    currentelement = currentelement?.children[element] ?? null;
-  }
-  if (currentelement) {
-    return true;
-  }
-  return false;
-}
-
 function addKeyToTree(cla) {
   let path = cla['dot_file_ext'].split('.');
   var currentelement = packagetree;
-  for (let index = 0; index < path.length; index++) {
-    const element = path[index];
-    if(!Object.keys(currentelement.children).includes(element)) {
-      if (index < path.length - 1) {
-        currentelement.children[element] = {name: element, children: {}, expanded: false};
+  for (let i = 0; i < path.length; i++) {
+    if(!Object.keys(currentelement.children).includes(path[i])) {
+      if (i < path.length - 1) {
+        currentelement.children[path[i]] = {name: path[i], children: {}, expanded: true};
       } else {
-        //console.log('hier');
-        currentelement.children[element] = {name: element, children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
+        currentelement.children[path[i]] = {name: path[i], children: {}, id: cla.index, label: cla.label, classtype: cla.classtype};
       }
-      //console.log('there');
+    } else {
+      if (i == path.length - 1) {
+        currentelement.children[path[i]].id = cla.index;
+        currentelement.children[path[i]].label = cla.label;
+        currentelement.children[path[i]].classtype = cla.classtype;
+      }
     }
-    currentelement = currentelement.children[element];
+    currentelement = currentelement.children[path[i]];
   }
 }
 

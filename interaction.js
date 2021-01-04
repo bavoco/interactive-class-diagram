@@ -174,27 +174,16 @@ function drawDependecies() {
       !show_structurers && classes[i].label == "Structurer") {
       return;
     }
-    let pkg1 = findIdInTree(i);
-    if (pkg1 == null) {
-      console.log(i);
-    } else {
-      for (const [key, value] of Object.entries(item)) {
-        if (!show_information_holders && classes[key].label == "Information Holder" ||
-          !show_service_providers && classes[key].label == "Service Provider" ||
-          !show_controllers && classes[key].label == "Controller" ||
-          !show_coordinators && classes[key].label == "Coordinator" ||
-          !show_interfacers && classes[key].label == "Interfacer" ||
-          !show_structurers && classes[key].label == "Structurer") {
-          return;
-        }
-        let pkg2 = findIdInTree(key);
-        if (pkg2 == null) {
-          console.log(key);
-        } else {
-          drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
-        }
-        
+    for (const [key, value] of Object.entries(item)) {
+      if (!show_information_holders && classes[key].label == "Information Holder" ||
+        !show_service_providers && classes[key].label == "Service Provider" ||
+        !show_controllers && classes[key].label == "Controller" ||
+        !show_coordinators && classes[key].label == "Coordinator" ||
+        !show_interfacers && classes[key].label == "Interfacer" ||
+        !show_structurers && classes[key].label == "Structurer") {
+        return;
       }
+      drawDependecie(classes[i].x, classes[i].y, classes[key].x, classes[key].y);
     }
   });
 }
