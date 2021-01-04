@@ -1,9 +1,7 @@
 var svgElement = document.getElementById('chart');
-var margin = {top: 0, right: 30, bottom: 20, left: 0};
 var ns = 'http://www.w3.org/2000/svg';
 var zoomlevel = 1;
 let elem = document.createElementNS(ns, "g");
-elem.setAttribute("transform", "translate(" + margin.right + "," + margin.top + ")");
 svgElement.appendChild(elem);
 var main_g = svgElement.firstChild;
 let isDragging = false;
@@ -17,20 +15,16 @@ var show_structurers = true;
 var show_interfacers = true;
 var show_coordinators = true;
 var show_controllers = true;
+var classWidth = 20;
 
 function draw() {
-  var svgWidth = Math.max(svgElement.clientWidth, 2000);
-  var svgHeight = Math.max(svgElement.clientHeight, 2000);
-  var width = svgWidth - margin.right - margin.left;
-  var height = svgHeight - margin.top - margin.bottom;
-
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
 
   // var rects = svgElement.firstChild.getElementsByTagName("g");
-  drawRect(packagetree, 0, 0, svgWidth, svgHeight, 1, main_g);
+  drawRect(packagetree, 0, 0, 0, 0, 1, main_g);
   drawPackageLines();
   drawDependecies();
 
@@ -217,8 +211,8 @@ function zoom(e) {
   zoomlevel = Math.min(Math.max(0.5, zoomlevel), 8);
   let zoom_dif = zoomlevel - oldzoom;
   if (zoom_dif != 0) {
-    let old_svg_x = (e.offsetX - margin.left - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
-    let old_svg_y = (e.offsetY - margin.top - pan_y) / (oldzoom * svgElement.clientHeight) * zoom_dif * svgElement.clientHeight;
+    let old_svg_x = (e.offsetX - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
+    let old_svg_y = (e.offsetY - pan_y) / (oldzoom * svgElement.clientHeight) * zoom_dif * svgElement.clientHeight;
     pan(old_svg_x, old_svg_y, 0, 0);
     //draw();
   }
@@ -254,6 +248,11 @@ window.addEventListener('mouseup', e => {
     isDragging = false;
   }
 });
+
+window.onresize = adjustViewBox;
+function adjustViewBox() {
+  svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
+}
 
 document.getElementById('toggle-information-holders').addEventListener('click', function() {
   show_information_holders = !show_information_holders;
