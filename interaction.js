@@ -148,8 +148,10 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
 }
 
 function enlarge(elem) {
+  elem = main_g.removeChild(elem);
   let content = elem.getAttribute('transform');
   elem.setAttribute('transform', content+"scale(5)");
+  main_g.appendChild(elem);
 }
 
 function reduce(elem) {
