@@ -187,12 +187,18 @@ function drawDependecies() {
         return;
       }
       let pkg2 = findIdInTree(key);
-      drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y);
+      drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y, value);
     }
   });
 }
 
-function drawDependecie(x1, y1, x2, y2) {
+function drawDependecie(x1, y1, x2, y2, depval) {
+  //value 1 x depends on y
+  //value 2 x sub class of y
+  //value 3 x implements y
+  if (depval != 1) {
+    return;
+  }
   let elem = document.createElementNS(ns, "line");
   elem.setAttribute("x1", x1);
   elem.setAttribute("y1", y1);
