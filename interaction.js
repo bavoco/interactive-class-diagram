@@ -99,9 +99,12 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   elem.setAttribute("ry", 2);
   elem.setAttribute("stroke", 'black');
   elem.setAttribute("stroke-width", 1);
-  elem.setAttribute("fill", "transparent");
+  if (Object.keys(pkg).includes('label')) {
+    elem.setAttribute("fill", roles[pkg.label].color);
+  } else {
+    elem.setAttribute("fill", "transparent");
+  }
   //elem.setAttribute("transform", "translate(" + xs+packagepadding + "," + ys+packagepadding + ")");
-  //elem.setAttribute("fill", roles[item.label].color);
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
