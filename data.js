@@ -8,7 +8,6 @@ var roles = {
   "Structurer": {color: "#B64991"}
 };
 var reverse_dependencies = [];
-var package_lines = [];
 
 function data_init() {
   buildPackageTree();
@@ -70,9 +69,6 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
   Object.keys(pkg.children).forEach((key, index) => {
     x = n_x + (index%size) * 21;
     y = n_y + Math.floor(index/size) * 21;
-    if (index == 0){
-      package_lines.push({parent: pkg.id, child: pkg.children[key].id});
-    }
     [lvs, size_x] = calcLeaves2(pkg.children[key], x, y, nn_x, nn_y, depth + 1);
     nn_x += size_x - nn_x;
     totlvs += lvs;
@@ -138,6 +134,38 @@ function findIdInSubtree(pkg, id) {
     i++;
   }
   return foundpkg;
+}
+
+function getListOfChildren(pkg) {
+  let childrenlist = [pkg.id];
+  Object.keys(pkg.children).forEach((key, index) => {
+    childrenlist = getListOfChildren(pkg.children[key]).concat(childrenlist);
+  });
+  return childrenlist;
+}
+
+function findDependencieDestination(id, maxdepth) {
+  return findDependencieDestinationSub(packagetree, id, maxdepth, 0);
+}
+
+function findDependencieDestinationSub(pkg, id, maxdepth, depth) {
+  if (pkg.id == id) {
+    return pkg;
+  }
+  let foundpkg = null;
+  let i = 0;
+  let keys = Object.keys(pkg.children);
+  while (foundpkg == null && i < keys.length) {
+    foundpkg = findDependencieDestinationSub(pkg.children[keys[i]], id, maxdepth, depth+1);
+    i++;
+  }
+  if (foundpkg == null) {
+    return null;
+  }
+  if (Object.keys(pkg).includes('expanded') && pkg.expanded == true && depth <= maxdepth - 1) {
+    return foundpkg;
+  }
+  return pkg;
 }
 
 function giveAllPackagesAnId() {

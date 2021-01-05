@@ -26,8 +26,6 @@ function draw() {
 
   // var rects = svgElement.firstChild.getElementsByTagName("g");
   drawRects(packagetree, 0, 0, 0, 0, 1, main_g);
-  drawPackageLines();
-  drawDependecies();
 
   // classes.forEach((item, i) => {
   //   if (!show_information_holders && item.label == "Information Holder") {
@@ -81,8 +79,13 @@ function drawRects(pkg, xs, ys, xe, ye, depth, parent) {
     //let size = xe / Math.ceil(Math.sqrt(numchildren));
     if (pkg.expanded && depth_slider_val >= depth) {
       Object.keys(pkg.children).forEach((key, index) => {
+        if (index == 0) {
+          drawPackageLine(pkg, pkg.children[key]);
+        }
         drawRects(pkg.children[key], 0, 0, 0, 0, depth+1, parent);
       });
+    } else {
+      aggregateDependencies(pkg);
     }
   }
 }
@@ -152,6 +155,21 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
   elem.setAttribute("style", "text-anchor: middle;");
   elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
+
+  for (const [key, value] of Object.entries(dependencies[cla.id])) {
+    if (!show_information_holders && classes[key].label == "Information Holder" ||
+      !show_service_providers && classes[key].label == "Service Provider" ||
+      !show_controllers && classes[key].label == "Controller" ||
+      !show_coordinators && classes[key].label == "Coordinator" ||
+      !show_interfacers && classes[key].label == "Interfacer" ||
+      !show_structurers && classes[key].label == "Structurer") {
+      continue;
+    }
+    if (value == 1) {
+      let dest = findDependencieDestination(key, depth_slider_val);
+      drawDependecie(cla.x, cla.y, dest.x, dest.y, 1);
+    }
+  }
 }
 
 function enlarge(elem) {
@@ -172,12 +190,8 @@ function toggleExpanded(id) {
   draw();
 }
 
-function drawPackageLines() {
-  package_lines.forEach((item, index) => {
-    let pkg1 = findIdInTree(item.parent);
-    let pkg2 = findIdInTree(item.child);
-    drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, pkg2.x + classWidth / 2, pkg2.y);
-  });
+function drawPackageLine(pkg1, pkg2) {
+  drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, pkg2.x + classWidth / 2, pkg2.y);
 }
 
 function drawDottedLine(x1, y1, x2, y2) {
@@ -192,29 +206,43 @@ function drawDottedLine(x1, y1, x2, y2) {
   main_g.appendChild(elem);
 }
 
-function drawDependecies() {
-  dependencies.forEach((item, i) => {
-    if (!show_information_holders && classes[i].label == "Information Holder" ||
-      !show_service_providers && classes[i].label == "Service Provider" ||
-      !show_controllers && classes[i].label == "Controller" ||
-      !show_coordinators && classes[i].label == "Coordinator" ||
-      !show_interfacers && classes[i].label == "Interfacer" ||
-      !show_structurers && classes[i].label == "Structurer") {
-      return;
+function aggregateDependencies(pkg) {
+  let children = getListOfChildren(pkg);
+  let counts = {};
+  for (let i = 0; i < children.length; i++) {
+    const id = children[i];
+    if (id >= classes.length) {
+      continue;
     }
-    let pkg1 = findIdInTree(i);
-    for (const [key, value] of Object.entries(item)) {
+    if (!show_information_holders && classes[id].label == "Information Holder" ||
+      !show_service_providers && classes[id].label == "Service Provider" ||
+      !show_controllers && classes[id].label == "Controller" ||
+      !show_coordinators && classes[id].label == "Coordinator" ||
+      !show_interfacers && classes[id].label == "Interfacer" ||
+      !show_structurers && classes[id].label == "Structurer") {
+      continue;
+    }
+    for (const [key, value] of Object.entries(dependencies[id])) {
       if (!show_information_holders && classes[key].label == "Information Holder" ||
         !show_service_providers && classes[key].label == "Service Provider" ||
         !show_controllers && classes[key].label == "Controller" ||
         !show_coordinators && classes[key].label == "Coordinator" ||
         !show_interfacers && classes[key].label == "Interfacer" ||
         !show_structurers && classes[key].label == "Structurer") {
-        return;
+        continue;
       }
-      let pkg2 = findIdInTree(key);
-      drawDependecie(pkg1.x, pkg1.y, pkg2.x, pkg2.y, value);
+      if (value == 1) {
+        let dest = findDependencieDestination(key, depth_slider_val);
+        if (Object.keys(counts).includes(dest.id)) {
+          counts[dest.id] = 1;
+        }
+        counts[dest.id]++;
+      }
     }
+  }
+  Object.keys(counts).forEach(item => {
+    let pkg2 = findIdInTree(item);
+    drawDependecie(pkg.x, pkg.y, pkg2.x, pkg2.y, 1);
   });
 }
 
