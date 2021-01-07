@@ -17,6 +17,7 @@ var show_coordinators = true;
 var show_controllers = true;
 var classWidth = 20;
 var depth_slider_val = 10;
+var threshold_slider_val = 1;
 
 function draw() {
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
@@ -156,18 +157,20 @@ function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
   elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
 
-  for (const [key, value] of Object.entries(dependencies[cla.id])) {
-    if (!show_information_holders && classes[key].label == "Information Holder" ||
-      !show_service_providers && classes[key].label == "Service Provider" ||
-      !show_controllers && classes[key].label == "Controller" ||
-      !show_coordinators && classes[key].label == "Coordinator" ||
-      !show_interfacers && classes[key].label == "Interfacer" ||
-      !show_structurers && classes[key].label == "Structurer") {
-      continue;
-    }
-    if (value == 1) {
-      let dest = findDependencieDestination(key, depth_slider_val);
-      drawDependecie(cla.x, cla.y, dest.x, dest.y, 1);
+  if (threshold_slider_val == 1) {
+    for (const [key, value] of Object.entries(dependencies[cla.id])) {
+      if (!show_information_holders && classes[key].label == "Information Holder" ||
+        !show_service_providers && classes[key].label == "Service Provider" ||
+        !show_controllers && classes[key].label == "Controller" ||
+        !show_coordinators && classes[key].label == "Coordinator" ||
+        !show_interfacers && classes[key].label == "Interfacer" ||
+        !show_structurers && classes[key].label == "Structurer") {
+        continue;
+      }
+      if (value == 1) {
+        let dest = findDependencieDestination(key, depth_slider_val);
+        drawDependecie(cla.x, cla.y, dest.x, dest.y, 1);
+      }
     }
   }
 }
@@ -241,8 +244,10 @@ function aggregateDependencies(pkg) {
     }
   }
   Object.keys(counts).forEach(item => {
-    let pkg2 = findIdInTree(item);
-    drawDependecie(pkg.x, pkg.y, pkg2.x, pkg2.y, 1);
+    if (counts[item] >= threshold_slider_val) {
+      let pkg2 = findIdInTree(item);
+      drawDependecie(pkg.x, pkg.y, pkg2.x, pkg2.y, counts[item]);
+    }
   });
 }
 
@@ -250,16 +255,13 @@ function drawDependecie(x1, y1, x2, y2, depval) {
   //value 1 x depends on y
   //value 2 x sub class of y
   //value 3 x implements y
-  if (depval != 1) {
-    return;
-  }
   let elem = document.createElementNS(ns, "line");
   elem.setAttribute("x1", x1 + classWidth / 2);
   elem.setAttribute("y1", y1);
   elem.setAttribute("x2", x2 + classWidth / 2);
   elem.setAttribute("y2", y2 + classWidth);
   elem.setAttribute("stroke", "black");
-  elem.setAttribute("stroke-width", .2);
+  elem.setAttribute("stroke-width", depval*0.1);
   main_g.appendChild(elem);
 }
 
@@ -353,5 +355,11 @@ document.getElementById('toggle-controllers').addEventListener('click', function
 document.getElementById('slider-depth').addEventListener('input', function() {
   depth_slider_val = document.getElementById('slider-depth').value;
   document.getElementById('slider-depth-output').textContent = depth_slider_val;
+  draw();
+}, {passige: true});
+
+document.getElementById('slider-threshold').addEventListener('input', function() {
+  threshold_slider_val = document.getElementById('slider-threshold').value;
+  document.getElementById('slider-threshold-output').textContent = threshold_slider_val;
   draw();
 }, {passige: true});
