@@ -115,13 +115,7 @@ function drawPackageRect(pkg, depth, parent) {
 }
 
 function drawClassRect(cla, depth, parent) {
-  if (!show_information_holders && cla.label == "Information Holder" ||
-      !show_service_providers && cla.label == "Service Provider" ||
-      !show_controllers && cla.label == "Controller" ||
-      !show_coordinators && cla.label == "Coordinator" ||
-      !show_interfacers && cla.label == "Interfacer" ||
-      !show_structurers && cla.label == "Structurer"
-  ) {
+  if (classRoleHidden(cla)) {
     return;
   }
   let elem = document.createElementNS(ns, "g");
@@ -214,10 +208,7 @@ function aggregateDependencies(pkg) {
   let counts = {};
   for (let i = 0; i < children.length; i++) {
     const id = children[i];
-    if (id >= classes.length) {
-      continue;
-    }
-    if (classRoleHidden(classes[id])) {
+    if (id >= classes.length || classRoleHidden(classes[id])) {
       continue;
     }
     for (const [key, value] of Object.entries(dependencies[id])) {
@@ -226,8 +217,8 @@ function aggregateDependencies(pkg) {
       }
       if (value == 1) {
         let dest = findDependencieDestination(key, depth_slider_val);
-        if (Object.keys(counts).includes(dest.id)) {
-          counts[dest.id] = 1;
+        if (!Object.keys(counts).includes(dest.id)) {
+          counts[dest.id] = 0;
         }
         counts[dest.id]++;
       }
