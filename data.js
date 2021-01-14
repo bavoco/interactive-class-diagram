@@ -71,7 +71,7 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
   });
   let returnval = Math.max(n_x + (size*21), nn_x) + 10;
   Object.keys(pkg.children).forEach((key, index) => {
-    pkg.children[key].x = (returnval-n_x) / 2 + pkg.children[key].x;
+    pkg.children[key].x = (returnval-n_x) / 2 - 21*size/2 + pkg.children[key].x;
     // if (Object.keys(pkg.children[key]).includes('id') && pkg.id <= classes.length) {
     //   classes[pkg.children[key].id].x = pkg.children[key].x;
     // }
