@@ -24,7 +24,6 @@ function draw() {
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
-  // var rects = svgElement.firstChild.getElementsByTagName("g");
   drawRects(packagetree, 1, main_g);
 }
 
@@ -99,12 +98,11 @@ function drawPackageRect(pkg, depth, parent) {
   elem.setAttribute("ry", 2);
   elem.setAttribute("stroke", 'black');
   elem.setAttribute("stroke-width", 1);
-  if (Object.keys(pkg).includes('label')) {
+  if (Object.keys(pkg).includes('label') && !classRoleHidden(pkg)) {
     elem.setAttribute("fill", roles[pkg.label].color);
   } else {
     elem.setAttribute("fill", "transparent");
   }
-  //elem.setAttribute("transform", "translate(" + xs+packagepadding + "," + ys+packagepadding + ")");
   parent.appendChild(elem);
 
   elem = document.createElementNS(ns, "text");
@@ -151,12 +149,7 @@ function drawClassRect(cla, depth, parent) {
 
   if (threshold_slider_val == 1) {
     for (const [key, value] of Object.entries(dependencies[cla.id])) {
-      if (!show_information_holders && classes[key].label == "Information Holder" ||
-        !show_service_providers && classes[key].label == "Service Provider" ||
-        !show_controllers && classes[key].label == "Controller" ||
-        !show_coordinators && classes[key].label == "Coordinator" ||
-        !show_interfacers && classes[key].label == "Interfacer" ||
-        !show_structurers && classes[key].label == "Structurer") {
+      if (classRoleHidden(classes[key])) {
         continue;
       }
       if (value == 1) {
@@ -204,6 +197,18 @@ function drawDottedLine(x1, y1, x2, y2) {
   main_g.appendChild(elem);
 }
 
+function classRoleHidden(cla) {
+  if (!show_information_holders && cla.label == "Information Holder" ||
+      !show_service_providers && cla.label == "Service Provider" ||
+      !show_controllers && cla.label == "Controller" ||
+      !show_coordinators && cla.label == "Coordinator" ||
+      !show_interfacers && cla.label == "Interfacer" ||
+      !show_structurers && cla.label == "Structurer") {
+    return true;
+  }
+  return false;
+}
+
 function aggregateDependencies(pkg) {
   let children = getListOfChildren(pkg);
   let counts = {};
@@ -212,21 +217,11 @@ function aggregateDependencies(pkg) {
     if (id >= classes.length) {
       continue;
     }
-    if (!show_information_holders && classes[id].label == "Information Holder" ||
-      !show_service_providers && classes[id].label == "Service Provider" ||
-      !show_controllers && classes[id].label == "Controller" ||
-      !show_coordinators && classes[id].label == "Coordinator" ||
-      !show_interfacers && classes[id].label == "Interfacer" ||
-      !show_structurers && classes[id].label == "Structurer") {
+    if (classRoleHidden(classes[id])) {
       continue;
     }
     for (const [key, value] of Object.entries(dependencies[id])) {
-      if (!show_information_holders && classes[key].label == "Information Holder" ||
-        !show_service_providers && classes[key].label == "Service Provider" ||
-        !show_controllers && classes[key].label == "Controller" ||
-        !show_coordinators && classes[key].label == "Coordinator" ||
-        !show_interfacers && classes[key].label == "Interfacer" ||
-        !show_structurers && classes[key].label == "Structurer") {
+      if (classRoleHidden(classes[key])) {
         continue;
       }
       if (value == 1) {
