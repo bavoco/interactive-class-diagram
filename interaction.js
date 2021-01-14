@@ -132,6 +132,9 @@ function drawClassRect(cla, depth, parent) {
 }
 
 function enlarge(elem) {
+  if (zoomlevel > 6) {
+    return;
+  }
   elem = main_g.removeChild(elem);
   let content = elem.getAttribute('transform');
   elem.setAttribute('transform', content+"scale(5)");
