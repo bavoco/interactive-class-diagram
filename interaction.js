@@ -35,13 +35,8 @@ function drawRects(pkg, depth, parent) {
   } else {
     drawPackageRect(pkg, depth, parent);
     if (pkg.expanded && depth_slider_val >= depth) {
-      if (numchildren > 1) {
-        drawPackageChildrenOutline(pkg);
-      }
+      drawPackageChildrenOutline(pkg);
       Object.keys(pkg.children).forEach((key, index) => {
-        if (index == 0) {
-          drawPackageLine(pkg, pkg.children[key]);
-        }
         drawRects(pkg.children[key], depth+1, parent);
       });
     } else {
@@ -64,6 +59,7 @@ function drawPackageChildrenOutline(pkg) {
   elem.setAttribute("stroke-width", 1);
   elem.setAttribute("fill", "transparent");
   main_g.appendChild(elem);
+  drawPackageLine(pkg, min_x + (max_x - min_x)/2, min_y);
 }
 
 function getChildPackageDimensions(pkg) {
@@ -192,8 +188,8 @@ function toggleExpanded(id) {
   draw();
 }
 
-function drawPackageLine(pkg1, pkg2) {
-  drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, pkg2.x + classWidth / 2, pkg2.y);
+function drawPackageLine(pkg1, to_x, to_y) {
+  drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, to_x, to_y);
 }
 
 function drawDottedLine(x1, y1, x2, y2) {
