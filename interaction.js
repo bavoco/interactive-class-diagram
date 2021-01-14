@@ -35,6 +35,9 @@ function drawRects(pkg, depth, parent) {
   } else {
     drawPackageRect(pkg, depth, parent);
     if (pkg.expanded && depth_slider_val >= depth) {
+      if (numchildren > 1) {
+        drawPackageChildrenOutline(pkg);
+      }
       Object.keys(pkg.children).forEach((key, index) => {
         if (index == 0) {
           drawPackageLine(pkg, pkg.children[key]);
@@ -45,6 +48,43 @@ function drawRects(pkg, depth, parent) {
       aggregateDependencies(pkg);
     }
   }
+}
+
+function drawPackageChildrenOutline(pkg) {
+  let min_x, min_y, max_x, max_y;
+  [min_x, min_y, max_x, max_y] = getChildPackageDimensions(pkg);
+  elem = document.createElementNS(ns, "rect");
+  elem.setAttribute("x", min_x);
+  elem.setAttribute("y", min_y);
+  elem.setAttribute("width", max_x - min_x);
+  elem.setAttribute("height", max_y - min_y);
+  elem.setAttribute("rx", 2);
+  elem.setAttribute("ry", 2);
+  elem.setAttribute("stroke", 'black');
+  elem.setAttribute("stroke-width", 1);
+  elem.setAttribute("fill", "transparent");
+  main_g.appendChild(elem);
+}
+
+function getChildPackageDimensions(pkg) {
+  let min_x = 10000, min_y = 10000, max_x = 0, max_y = 0;
+  Object.keys(pkg.children).forEach(key => {
+    let child = pkg.children[key];
+    if (min_x > child.x) {
+      min_x = child.x;
+    }
+    if (min_y > child.y) {
+      min_y = child.y;
+    }
+    if (max_x < child.x) {
+      max_x = child.x;
+    }
+    if (max_y < child.y) {
+      max_y = child.y;
+    }
+  });
+  let packagepadding = 2.5;
+  return [min_x - packagepadding, min_y - packagepadding, max_x + classWidth + packagepadding, max_y + classWidth + packagepadding];
 }
 
 function drawPackageRect(pkg, depth, parent) {
