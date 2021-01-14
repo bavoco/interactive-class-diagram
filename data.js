@@ -48,10 +48,6 @@ function placement() {
 }
 
 function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
-  // if (Object.keys(pkg).includes('id') && pkg.id <= classes.length) {
-  //   classes[pkg.id].x = x;
-  //   classes[pkg.id].y = y;
-  // }
   pkg.x = x;
   pkg.y = y;
   let numchildren = Object.keys(pkg.children).length;

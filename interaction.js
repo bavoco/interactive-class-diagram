@@ -24,66 +24,22 @@ function draw() {
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
-
   // var rects = svgElement.firstChild.getElementsByTagName("g");
-  drawRects(packagetree, 0, 0, 0, 0, 1, main_g);
-
-  // classes.forEach((item, i) => {
-  //   if (!show_information_holders && item.label == "Information Holder") {
-  //     return;
-  //   }
-  //   if (!show_service_providers && item.label == "Service Provider") {
-  //     return;
-  //   }
-  //   let class_holder = document.createElementNS(ns, "g");
-  //   class_holder.setAttribute("transform", "translate(" + x(item.x) + "," + y(item.y) + ")");
-  //   main_g.appendChild(class_holder);
-
-  //   let elem = document.createElementNS(ns, "rect");
-  //   elem.setAttribute("width", classWidth);
-  //   elem.setAttribute("height", classWidth);
-  //   elem.setAttribute("transform", "translate(" + 0 + "," + 0 + ")");
-  //   elem.setAttribute("fill", roles[item.label].color);
-  //   class_holder.appendChild(elem);
-
-  //   elem = document.createElementNS(ns, "text");
-  //   elem.setAttribute("x", classWidth/2);
-  //   elem.setAttribute("y", 2);
-  //   elem.setAttribute("font-size", 2);
-  //   elem.setAttribute("style", "text-anchor: middle;");
-  //   elem.appendChild(document.createTextNode("<<" + item.label + ">>"));
-  //   class_holder.appendChild(elem);
-
-  //   elem = document.createElementNS(ns, "text");
-  //   elem.setAttribute("x", classWidth/2);
-  //   elem.setAttribute("y", 4);
-  //   elem.setAttribute("font-size", 2);
-  //   elem.setAttribute("style", "text-anchor: middle;");
-  //   elem.appendChild(document.createTextNode(item.classname));
-  //   class_holder.appendChild(elem);
-  // });
-
+  drawRects(packagetree, 1, main_g);
 }
 
-function drawRects(pkg, xs, ys, xe, ye, depth, parent) {
-  //let new_parent = document.createElementNS(ns, "g");
-  //new_parent.setAttribute("transform", "translate(" + xs + "," + ys + ")");
-  //parent.appendChild(new_parent);
+function drawRects(pkg, depth, parent) {
   let numchildren = Object.keys(pkg.children).length; 
   if (numchildren == 0) {
-    drawClassRect(pkg, 0, 0, xe, ye, depth, parent);
-  //} else if (numchildren == 1) {
-    //drawPackageRect(pkg, 0, 0, xe, ye, depth, parent);
-    //drawRect(pkg.children[Object.keys(pkg.children)[0]], 3, 3, xe-6, ye-6, depth+1, parent);
+    drawClassRect(pkg, depth, parent);
   } else {
-    drawPackageRect(pkg, 0, 0, 0, 0, depth, parent);
-    //let size = xe / Math.ceil(Math.sqrt(numchildren));
+    drawPackageRect(pkg, depth, parent);
     if (pkg.expanded && depth_slider_val >= depth) {
       Object.keys(pkg.children).forEach((key, index) => {
         if (index == 0) {
           drawPackageLine(pkg, pkg.children[key]);
         }
-        drawRects(pkg.children[key], 0, 0, 0, 0, depth+1, parent);
+        drawRects(pkg.children[key], depth+1, parent);
       });
     } else {
       aggregateDependencies(pkg);
@@ -91,7 +47,7 @@ function drawRects(pkg, xs, ys, xe, ye, depth, parent) {
   }
 }
 
-function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
+function drawPackageRect(pkg, depth, parent) {
   let elem = document.createElementNS(ns, "g");
   elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
   elem.setAttribute("onmouseenter", "enlarge(this)");
@@ -124,7 +80,7 @@ function drawPackageRect(pkg, xs, ys, xe, ye, depth, parent) {
   parent.appendChild(elem);
 }
 
-function drawClassRect(cla, xs, ys, xe, ye, depth, parent) {
+function drawClassRect(cla, depth, parent) {
   if (!show_information_holders && cla.label == "Information Holder" ||
       !show_service_providers && cla.label == "Service Provider" ||
       !show_controllers && cla.label == "Controller" ||
