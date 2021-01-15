@@ -25,19 +25,19 @@ function draw() {
   while (main_g.firstChild) {
     main_g.removeChild(main_g.firstChild);
   }
-  drawRects(packagetree, 1, main_g);
+  drawRects(packagetree, 1);
 }
 
-function drawRects(pkg, depth, parent) {
+function drawRects(pkg, depth) {
   let numchildren = Object.keys(pkg.children).length; 
   if (numchildren == 0) {
-    drawClassRect(pkg, depth, parent);
+    drawClassRect(pkg, depth);
   } else {
-    drawPackageRect(pkg, depth, parent);
+    drawPackageRect(pkg, depth);
     if (pkg.expanded && depth_slider_val >= depth) {
       drawPackageChildrenOutline(pkg);
-      Object.keys(pkg.children).forEach((key, index) => {
-        drawRects(pkg.children[key], depth+1, parent);
+      Object.keys(pkg.children).forEach(key => {
+        drawRects(pkg.children[key], depth+1);
       });
     } else if (!aggregate_dependencies) {
       aggregateDependencies(pkg);
@@ -94,13 +94,13 @@ function getChildPackageDimensions(pkg) {
   return [min_x - packagepadding, min_y - packagepadding, max_x + classWidth + packagepadding, max_y + classWidth + packagepadding];
 }
 
-function drawPackageRect(pkg, depth, parent) {
+function drawPackageRect(pkg, depth) {
   let elem = document.createElementNS(ns, "g");
   elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
   elem.setAttribute("onmouseenter", "enlarge(this)");
   elem.setAttribute("onmouseleave", "reduce(this)");
   elem.setAttribute("onclick", "toggleExpanded("+pkg.id+")");
-  parent = parent.appendChild(elem);
+  let parent = main_g.appendChild(elem);
 
   let packagepadding = 0;
   elem = document.createElementNS(ns, "rect");
@@ -126,7 +126,7 @@ function drawPackageRect(pkg, depth, parent) {
   parent.appendChild(elem);
 }
 
-function drawClassRect(cla, depth, parent) {
+function drawClassRect(cla, depth) {
   if (classRoleHidden(cla)) {
     return;
   }
@@ -134,7 +134,7 @@ function drawClassRect(cla, depth, parent) {
   elem.setAttribute("transform", "translate(" + cla.x + "," + cla.y + ")");
   elem.setAttribute("onmouseenter", "enlarge(this)");
   elem.setAttribute("onmouseleave", "reduce(this)");
-  parent = parent.appendChild(elem);
+  let parent = main_g.appendChild(elem);
 
   let classpadding = 0;
   elem = document.createElementNS(ns, "rect");
