@@ -59,7 +59,15 @@ function drawPackageChildrenOutline(pkg) {
   elem.setAttribute("stroke-width", 1);
   elem.setAttribute("fill", "transparent");
   main_g.appendChild(elem);
-  drawPackageLine(pkg, min_x + (max_x - min_x)/2, min_y);
+  if (!aggregate_dependencies) {
+    drawDottedLine(pkg.x + classWidth / 2, pkg.y + classWidth, min_x + (max_x - min_x)/2, min_y);
+  } else {
+    let parent = findClassParent(pkg.id, 10);
+    let pkg2 = findIdInTree(parent);
+    let minx, miny, maxx, maxy;
+    [minx, miny, maxx, maxy] = getChildPackageDimensions(pkg2);
+    drawDottedLine((maxx-minx)/2 + minx, maxy, min_x + (max_x - min_x)/2, min_y);
+  }
   if (aggregate_dependencies) {
     aggregateDependenciesChildren(pkg, min_x, min_y, max_x, max_y);
   }
@@ -177,10 +185,6 @@ function toggleExpanded(id) {
   pkg = findIdInTree(id);
   pkg.expanded = !pkg.expanded;
   draw();
-}
-
-function drawPackageLine(pkg1, to_x, to_y) {
-  drawDottedLine(pkg1.x + classWidth / 2, pkg1.y + classWidth, to_x, to_y);
 }
 
 function drawDottedLine(x1, y1, x2, y2) {
