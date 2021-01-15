@@ -60,7 +60,7 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
   let totlvs = 0;
   let lvs = 0;
   let size_x = 0;
-  let nn_y = n_y + size_y * 21 + 10;
+  let nn_y = n_y + size_y * 21 + 40;
   let nn_x = n_x;
   Object.keys(pkg.children).forEach((key, index) => {
     x = n_x + (index%size) * 21;
@@ -138,6 +138,37 @@ function getListOfChildren(pkg) {
     childrenlist = getListOfChildren(pkg.children[key]).concat(childrenlist);
   });
   return childrenlist;
+}
+
+function findClassParent(id, maxdepth) {
+  let returnval = findClassParentSub(packagetree, id, maxdepth, 0);
+  if (returnval == -1) {
+    return classes.length + 1;
+  }
+  return returnval;
+}
+
+function findClassParentSub(pkg, id, maxdepth, depth) {
+  if (pkg.id == id) {
+    return -1;
+  }
+  let foundpkg = null;
+  let i = 0;
+  let keys = Object.keys(pkg.children);
+  while (foundpkg == null && i < keys.length) {
+    foundpkg = findClassParentSub(pkg.children[keys[i]], id, maxdepth, depth+1);
+    i++;
+  }
+  if (foundpkg == null) {
+    return null;
+  }
+  if (Object.keys(pkg).includes('expanded') && pkg.expanded == true && depth <= maxdepth - 1) {
+    if (foundpkg == -1) {
+      return pkg.id;
+    }
+    return foundpkg;
+  }
+  return -1;
 }
 
 function findDependencieDestination(id, maxdepth) {

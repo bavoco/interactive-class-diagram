@@ -18,6 +18,7 @@ var show_controllers = true;
 var classWidth = 20;
 var depth_slider_val = 10;
 var threshold_slider_val = 1;
+var aggregate_dependencies = true;
 
 function draw() {
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
@@ -38,7 +39,7 @@ function drawRects(pkg, depth, parent) {
       Object.keys(pkg.children).forEach((key, index) => {
         drawRects(pkg.children[key], depth+1, parent);
       });
-    } else {
+    } else if (!aggregate_dependencies) {
       aggregateDependencies(pkg);
     }
   }
@@ -59,6 +60,9 @@ function drawPackageChildrenOutline(pkg) {
   elem.setAttribute("fill", "transparent");
   main_g.appendChild(elem);
   drawPackageLine(pkg, min_x + (max_x - min_x)/2, min_y);
+  if (aggregate_dependencies) {
+    aggregateDependenciesChildren(pkg, min_x, min_y, max_x, max_y);
+  }
 }
 
 function getChildPackageDimensions(pkg) {
@@ -141,14 +145,14 @@ function drawClassRect(cla, depth, parent) {
   elem.appendChild(document.createTextNode(cla.name));
   parent.appendChild(elem);
 
-  if (threshold_slider_val == 1) {
+  if (threshold_slider_val == 1 && !aggregate_dependencies) {
     for (const [key, value] of Object.entries(dependencies[cla.id])) {
       if (classRoleHidden(classes[key])) {
         continue;
       }
       if (value == 1) {
         let dest = findDependencieDestination(key, depth_slider_val);
-        drawDependecie(cla.x, cla.y, dest.x, dest.y, 1);
+        drawDependecie(cla.x + classWidth/2, cla.y, dest.x + classWidth/2, dest.y + classWidth, 1);
       }
     }
   }
@@ -217,7 +221,7 @@ function aggregateDependencies(pkg) {
       }
       if (value == 1) {
         let dest = findDependencieDestination(key, depth_slider_val);
-        if (!Object.keys(counts).includes(dest.id)) {
+        if (!Object.keys(counts).includes(dest.id.toString())) {
           counts[dest.id] = 0;
         }
         counts[dest.id]++;
@@ -227,7 +231,49 @@ function aggregateDependencies(pkg) {
   Object.keys(counts).forEach(item => {
     if (counts[item] >= threshold_slider_val) {
       let pkg2 = findIdInTree(item);
-      drawDependecie(pkg.x, pkg.y, pkg2.x, pkg2.y, counts[item]);
+      drawDependecie(pkg.x + classWidth/2, pkg.y, pkg2.x + classWidth/2, pkg2.y + classWidth, counts[item]);
+    }
+  });
+}
+
+function aggregateDependenciesChildren(pkg, minx, miny, maxx, maxy) {
+  let children = [];
+  Object.keys(pkg.children).forEach(item => {
+    if (Object.keys(pkg.children[item]).includes('expanded')) {
+      if (pkg.children[item].expanded) {
+        children.push(pkg.children[item].id);
+      } else {
+        children = children.concat(getListOfChildren(pkg.children[item]));
+      }
+    } else {
+      children.push(pkg.children[item].id);
+    }
+  });
+  let counts = {};
+  for (let i = 0; i < children.length; i++) {
+    const id = children[i];
+    if (id >= classes.length || classRoleHidden(classes[id])) {
+      continue;
+    }
+    for (const [key, value] of Object.entries(dependencies[id])) {
+      if (classRoleHidden(classes[key])) {
+        continue;
+      }
+      if (value == 1) {
+        let dest = findClassParent(key, depth_slider_val);
+        if (!Object.keys(counts).includes(dest.toString())) {
+          counts[dest] = 0;
+        }
+        counts[dest]++;
+      }
+    }
+  }
+  Object.keys(counts).forEach(item => {
+    if (counts[item] >= threshold_slider_val) {
+      let pkg2 = findIdInTree(item);
+      let min_x, min_y, max_x, max_y;
+      [min_x, min_y, max_x, max_y] = getChildPackageDimensions(pkg2);
+      drawDependecie((maxx-minx)/2 + minx, miny, (max_x-min_x)/2 + min_x, max_y, counts[item]);
     }
   });
 }
@@ -237,12 +283,12 @@ function drawDependecie(x1, y1, x2, y2, depval) {
   //value 2 x sub class of y
   //value 3 x implements y
   let elem = document.createElementNS(ns, "line");
-  elem.setAttribute("x1", x1 + classWidth / 2);
+  elem.setAttribute("x1", x1);
   elem.setAttribute("y1", y1);
-  elem.setAttribute("x2", x2 + classWidth / 2);
-  elem.setAttribute("y2", y2 + classWidth);
+  elem.setAttribute("x2", x2);
+  elem.setAttribute("y2", y2);
   elem.setAttribute("stroke", "black");
-  elem.setAttribute("stroke-width", depval*0.1);
+  elem.setAttribute("stroke-width", Math.min(depval*0.1, 5));
   main_g.appendChild(elem);
 }
 
@@ -344,3 +390,9 @@ document.getElementById('slider-threshold').addEventListener('input', function()
   document.getElementById('slider-threshold-output').textContent = threshold_slider_val;
   draw();
 }, {passige: true});
+
+document.getElementById('toggle-aggregate-dependencies').addEventListener('click', function() {
+  aggregate_dependencies = !aggregate_dependencies;
+  document.getElementById('toggle-aggregate-dependencies').setAttribute('data-checked', aggregate_dependencies);
+  draw();
+}, {passive: true});
