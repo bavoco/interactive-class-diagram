@@ -20,6 +20,9 @@ var depth_slider_val = 10;
 var threshold_slider_val = 1;
 var aggregate_dependencies = true;
 
+/**
+ * Draw visualization
+ */
 function draw() {
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
   while (main_g.firstChild) {
@@ -28,6 +31,11 @@ function draw() {
   drawRects(packagetree, 1);
 }
 
+/**
+ * Draw classes and packages in a package
+ * @param {object} pkg package to draw
+ * @param {int} depth current depth
+ */
 function drawRects(pkg, depth) {
   let numchildren = Object.keys(pkg.children).length; 
   if (numchildren == 0) {
@@ -45,6 +53,10 @@ function drawRects(pkg, depth) {
   }
 }
 
+/**
+ * Draw rectangle around children of a package.
+ * @param {object} pkg parent package
+ */
 function drawPackageChildrenOutline(pkg) {
   let min_x, min_y, max_x, max_y;
   [min_x, min_y, max_x, max_y] = getChildPackageDimensions(pkg);
@@ -62,17 +74,25 @@ function drawPackageChildrenOutline(pkg) {
   if (!aggregate_dependencies) {
     drawDottedLine(pkg.x + classWidth / 2, pkg.y + classWidth, min_x + (max_x - min_x)/2, min_y);
   } else {
-    let parent = findClassParent(pkg.id, 10);
-    let pkg2 = findIdInTree(parent);
-    let minx, miny, maxx, maxy;
-    [minx, miny, maxx, maxy] = getChildPackageDimensions(pkg2);
-    drawDottedLine((maxx-minx)/2 + minx, maxy, min_x + (max_x - min_x)/2, min_y);
+    let parent = findClassParent(packagetree, pkg.id, 10, 0);
+    if (parent == -1) {
+      drawDottedLine(pkg.x + classWidth / 2, pkg.y + classWidth, min_x + (max_x - min_x)/2, min_y);
+    } else {
+      let pkg2 = findIdInTree(packagetree, parent);
+      let minx, miny, maxx, maxy;
+      [minx, miny, maxx, maxy] = getChildPackageDimensions(pkg2);
+      drawDottedLine((maxx-minx)/2 + minx, maxy, min_x + (max_x - min_x)/2, min_y);
+    }
   }
   if (aggregate_dependencies) {
     aggregateDependenciesChildren(pkg, min_x, min_y, max_x, max_y);
   }
 }
 
+/**
+ * Get dimensions of the rectangle containing children packages/classes
+ * @param {object} pkg parent package
+ */
 function getChildPackageDimensions(pkg) {
   let min_x = 10000, min_y = 10000, max_x = 0, max_y = 0;
   Object.keys(pkg.children).forEach(key => {
@@ -94,6 +114,11 @@ function getChildPackageDimensions(pkg) {
   return [min_x - packagepadding, min_y - packagepadding, max_x + classWidth + packagepadding, max_y + classWidth + packagepadding];
 }
 
+/**
+ * Draw a package
+ * @param {object} pkg package to draw
+ * @param {int} depth depth of the package
+ */
 function drawPackageRect(pkg, depth) {
   let elem = document.createElementNS(ns, "g");
   elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
@@ -126,6 +151,11 @@ function drawPackageRect(pkg, depth) {
   parent.appendChild(elem);
 }
 
+/**
+ * Draw a Class
+ * @param {object} cla class to draw
+ * @param {int} depth depth of the class
+ */
 function drawClassRect(cla, depth) {
   if (classRoleHidden(cla)) {
     return;
@@ -159,13 +189,17 @@ function drawClassRect(cla, depth) {
         continue;
       }
       if (value == 1) {
-        let dest = findDependencieDestination(key, depth_slider_val);
+        let dest = findDependencieDestination(packagetree, key, depth_slider_val, 0);
         drawDependecie(cla.x + classWidth/2, cla.y, dest.x + classWidth/2, dest.y + classWidth, 1);
       }
     }
   }
 }
 
+/**
+ * Make an element larger.
+ * @param {SVGElement} elem element to enlarge
+ */
 function enlarge(elem) {
   if (zoomlevel > 6) {
     return;
@@ -176,17 +210,32 @@ function enlarge(elem) {
   main_g.appendChild(elem);
 }
 
+/**
+ * Make an enlarged element small.
+ * @param {SVGElement} elem element to reduce
+ */
 function reduce(elem) {
   let content = elem.getAttribute('transform');
   elem.setAttribute('transform', content.replace('scale(5)', ''));
 }
 
+/**
+ * Toggle expanded on a package.
+ * @param {int} id package to toggle
+ */
 function toggleExpanded(id) {
-  pkg = findIdInTree(id);
+  pkg = findIdInTree(packagetree, id);
   pkg.expanded = !pkg.expanded;
   draw();
 }
 
+/**
+ * Draw a dotted line.
+ * @param {int} x1 start x
+ * @param {int} y1 start y
+ * @param {int} x2 end x
+ * @param {int} y2 end y
+ */
 function drawDottedLine(x1, y1, x2, y2) {
   let elem = document.createElementNS(ns, "line");
   elem.setAttribute("x1", x1);
@@ -199,6 +248,11 @@ function drawDottedLine(x1, y1, x2, y2) {
   main_g.appendChild(elem);
 }
 
+/**
+ * Check if class role is hidden.
+ * @param {object} cla - class to check role of.
+ * @returns {boolean} whether class role is hidden.
+ */
 function classRoleHidden(cla) {
   if (!show_information_holders && cla.label == "Information Holder" ||
       !show_service_providers && cla.label == "Service Provider" ||
@@ -211,6 +265,10 @@ function classRoleHidden(cla) {
   return false;
 }
 
+/**
+ * Aggregates dependencies of a package.
+ * @param {object} pkg - package.
+ */
 function aggregateDependencies(pkg) {
   let children = getListOfChildren(pkg);
   let counts = {};
@@ -224,7 +282,7 @@ function aggregateDependencies(pkg) {
         continue;
       }
       if (value == 1) {
-        let dest = findDependencieDestination(key, depth_slider_val);
+        let dest = findDependencieDestination(packagetree, key, depth_slider_val, 0);
         if (!Object.keys(counts).includes(dest.id.toString())) {
           counts[dest.id] = 0;
         }
@@ -234,12 +292,20 @@ function aggregateDependencies(pkg) {
   }
   Object.keys(counts).forEach(item => {
     if (counts[item] >= threshold_slider_val) {
-      let pkg2 = findIdInTree(item);
+      let pkg2 = findIdInTree(packagetree, item);
       drawDependecie(pkg.x + classWidth/2, pkg.y, pkg2.x + classWidth/2, pkg2.y + classWidth, counts[item]);
     }
   });
 }
 
+/**
+ * Aggregate dependencies of children packages
+ * @param {object} pkg - parent package
+ * @param {int} minx - left x of children packages
+ * @param {int} miny - top y of children packages
+ * @param {int} maxx - right x of children packages
+ * @param {int} maxy - bottom y of children packages
+ */
 function aggregateDependenciesChildren(pkg, minx, miny, maxx, maxy) {
   let children = [];
   Object.keys(pkg.children).forEach(item => {
@@ -264,7 +330,7 @@ function aggregateDependenciesChildren(pkg, minx, miny, maxx, maxy) {
         continue;
       }
       if (value == 1) {
-        let dest = findClassParent(key, depth_slider_val);
+        let dest = findClassParent(packagetree, key, depth_slider_val, 0);
         if (!Object.keys(counts).includes(dest.toString())) {
           counts[dest] = 0;
         }
@@ -274,7 +340,7 @@ function aggregateDependenciesChildren(pkg, minx, miny, maxx, maxy) {
   }
   Object.keys(counts).forEach(item => {
     if (counts[item] >= threshold_slider_val) {
-      let pkg2 = findIdInTree(item);
+      let pkg2 = findIdInTree(packagetree, item);
       let min_x, min_y, max_x, max_y;
       [min_x, min_y, max_x, max_y] = getChildPackageDimensions(pkg2);
       drawDependecie((maxx-minx)/2 + minx, miny, (max_x-min_x)/2 + min_x, max_y, counts[item]);
@@ -282,6 +348,14 @@ function aggregateDependenciesChildren(pkg, minx, miny, maxx, maxy) {
   });
 }
 
+/**
+ * Draw dependencie line
+ * @param {int} x1 - start x.
+ * @param {int} y1 - start y.
+ * @param {int} x2 - end x.
+ * @param {int} y2 - end y.
+ * @param {int} depval - amount of dependencies to represent.
+ */
 function drawDependecie(x1, y1, x2, y2, depval) {
   //value 1 x depends on y
   //value 2 x sub class of y
@@ -296,6 +370,10 @@ function drawDependecie(x1, y1, x2, y2, depval) {
   main_g.appendChild(elem);
 }
 
+/**
+ * Zoom visualization.
+ * @param {Event} e - zoom event
+ */
 function zoom(e) {
   e.preventDefault();
   let oldzoom = zoomlevel;
@@ -311,11 +389,22 @@ function zoom(e) {
   }
 }
 
+/**
+ * Pan visualization.
+ * @param {int} x - start x.
+ * @param {int} y - start y.
+ * @param {int} new_x - end x.
+ * @param {int} new_y - end y.
+ */
 function pan(x, y, new_x, new_y) {
   pan_x = pan_x + new_x - x;
   pan_y = pan_y + new_y - y;
   main_g.setAttribute("transform", "translate("+pan_x+","+pan_y+") scale("+zoomlevel+")");
 }
+
+//
+// Event Listeners for mouse interaction
+//
 
 svgElement.addEventListener('wheel', zoom, {passive: false});
 
@@ -342,10 +431,15 @@ window.addEventListener('mouseup', e => {
   }
 });
 
+// update viewbox on window resize
 window.onresize = adjustViewBox;
 function adjustViewBox() {
   svgElement.setAttribute("viewBox", [0, 0, svgElement.clientWidth, svgElement.clientHeight]);
 }
+
+//
+// Event listeners for toggles and sliders in sidebar
+//
 
 document.getElementById('toggle-information-holders').addEventListener('click', function() {
   show_information_holders = !show_information_holders;

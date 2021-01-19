@@ -1,4 +1,4 @@
-// uses classes and dependencies
+// define role colors
 var roles = {
   "Controller": {color: "#6D00FF"},
   "Coordinator": {color: "#36C95E"},
@@ -7,24 +7,32 @@ var roles = {
   "Service Provider": {color: "#23B9DC"},
   "Structurer": {color: "#B64991"}
 };
-var reverse_dependencies = [];
+//var reverse_dependencies = [];
+var packagetree = {children: {}, name: 'root', expanded: true};
 
+/**
+ * Build data structure needed for visualization.
+ */
 function data_init() {
   buildPackageTree();
   placement();
   draw();
 }
 
-var packagetree = {children: {}, name: 'root', expanded: true};
-
+/**
+ * Add all classes to packagetree and give packages an id.
+ */
 function buildPackageTree() {
   for (let i = 0; i < classes.length; i++) {
     addKeyToTree(classes[i]);
   }
-  giveAllPackagesAnId();
-  console.log(packagetree);
+  giveAllPackagesAnId(packagetree, classes.length + 1);
+  //console.log(packagetree);
 }
 
+/**
+ * Computes and displays number of classes per role in sidebar.
+ */
 function numClassesPerRole() {
   var rolecount = roles;
   for (var prop in rolecount) {
@@ -40,14 +48,25 @@ function numClassesPerRole() {
   }
 }
 
+/**
+ * Computes placement, initializes calcLeaves.
+ */
 function placement() {
   let max_x = 0;
   let lvs = 0;
-  [lvs, max_x] = calcLeaves2(packagetree, 0, 0, 0, 30, 0);
-  packagetree.x = max_x / 2;
+  [lvs, max_x] = calcLeaves(packagetree, 0, 0, 0, 100);
+  packagetree.x = max_x / 2 - 21 / 2;
 }
 
-function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
+/**
+ * Computes placement of all packages and classes in packagetree.
+ * @param {object} pkg - package.
+ * @param {int} x - x for current package.
+ * @param {int} y - y for current package.
+ * @param {int} n_x - next x for children of current package.
+ * @param {int} n_y - next y for children of current package.
+ */
+function calcLeaves(pkg, x, y, n_x, n_y) {
   pkg.x = x;
   pkg.y = y;
   let numchildren = Object.keys(pkg.children).length;
@@ -60,39 +79,38 @@ function calcLeaves2(pkg, x, y, n_x, n_y, depth) {
   let totlvs = 0;
   let lvs = 0;
   let size_x = 0;
-  let nn_y = n_y + size_y * 21 + 40;
+  let nn_y = n_y + size_y * 21 + 100;
   let nn_x = n_x;
   Object.keys(pkg.children).forEach((key, index) => {
     x = n_x + (index%size) * 21;
     y = n_y + Math.floor(index/size) * 21;
-    [lvs, size_x] = calcLeaves2(pkg.children[key], x, y, nn_x, nn_y, depth + 1);
+    [lvs, size_x] = calcLeaves(pkg.children[key], x, y, nn_x, nn_y);
     nn_x += size_x - nn_x;
     totlvs += lvs;
   });
   let returnval = Math.max(n_x + (size*21), nn_x) + 10;
-  Object.keys(pkg.children).forEach((key, index) => {
+  Object.keys(pkg.children).forEach(key => {
     pkg.children[key].x = (returnval-n_x) / 2 - 21*size/2 + pkg.children[key].x;
-    // if (Object.keys(pkg.children[key]).includes('id') && pkg.id <= classes.length) {
-    //   classes[pkg.children[key].id].x = pkg.children[key].x;
-    // }
   });
   pkg.leaves = totlvs;
-  //pkg.x = ((returnval-pkg.x) / 2) + pkg.x;
-  //console.log(returnval);
   return [totlvs, returnval];
 }
 
-function computeReverseDependencies() {
-  for (var i = 0; i < dependencies.length; i++) {
-    reverse_dependencies.push({});
-  }
-  for (var i = 0; i < dependencies.length; i++) {
-    for (const [key, value] of Object.entries(dependencies[i])) {
-      reverse_dependencies[key][i] = value;
-    }
-  }
-}
+// function computeReverseDependencies() {
+//   for (var i = 0; i < dependencies.length; i++) {
+//     reverse_dependencies.push({});
+//   }
+//   for (var i = 0; i < dependencies.length; i++) {
+//     for (const [key, value] of Object.entries(dependencies[i])) {
+//       reverse_dependencies[key][i] = value;
+//     }
+//   }
+// }
 
+/**
+ * Adds a class to the packagetree.
+ * @param {object} cla - class to add to the packagetree. 
+ */
 function addKeyToTree(cla) {
   let path = cla['dot_file_ext'].split('.');
   var currentelement = packagetree;
@@ -114,11 +132,13 @@ function addKeyToTree(cla) {
   }
 }
 
-function findIdInTree(id) {
-  return findIdInSubtree(packagetree, id);
-}
-
-function findIdInSubtree(pkg, id) {
+/**
+ * Find id in tree.
+ * @param {object} pkg - package to search through (haystack).
+ * @param {int} id - needle.
+ * @returns {(null|object)} null if id not found or package where id == needle.
+ */
+function findIdInTree(pkg, id) {
   if (pkg.id == id) {
     return pkg;
   }
@@ -126,12 +146,17 @@ function findIdInSubtree(pkg, id) {
   let i = 0;
   let keys = Object.keys(pkg.children);
   while (foundpkg == null && i < keys.length) {
-    foundpkg = findIdInSubtree(pkg.children[keys[i]], id);
+    foundpkg = findIdInTree(pkg.children[keys[i]], id);
     i++;
   }
   return foundpkg;
 }
 
+/**
+ * returns list of children ids.
+ * @param {object} pkg - package.
+ * @returns {Array} list of children ids including package id.
+ */
 function getListOfChildren(pkg) {
   let childrenlist = [pkg.id];
   Object.keys(pkg.children).forEach((key, index) => {
@@ -140,15 +165,15 @@ function getListOfChildren(pkg) {
   return childrenlist;
 }
 
-function findClassParent(id, maxdepth) {
-  let returnval = findClassParentSub(packagetree, id, maxdepth, 0);
-  if (returnval == -1) {
-    return classes.length + 1;
-  }
-  return returnval;
-}
-
-function findClassParentSub(pkg, id, maxdepth, depth) {
+/**
+ * Finds parent of package or class with passed id.
+ * @param {object} pkg - package to search in (haystack).
+ * @param {int} id - needle.
+ * @param {int} maxdepth - if parent of found id is lower than this depth, return anscestor at this depth.
+ * @param {int} depth - current depth.
+ * @returns {(null|int)} null if id not found or -1 if parent should be returned or id >= 0 of parent class. 
+ */
+function findClassParent(pkg, id, maxdepth, depth) {
   if (pkg.id == id) {
     return -1;
   }
@@ -156,7 +181,7 @@ function findClassParentSub(pkg, id, maxdepth, depth) {
   let i = 0;
   let keys = Object.keys(pkg.children);
   while (foundpkg == null && i < keys.length) {
-    foundpkg = findClassParentSub(pkg.children[keys[i]], id, maxdepth, depth+1);
+    foundpkg = findClassParent(pkg.children[keys[i]], id, maxdepth, depth+1);
     i++;
   }
   if (foundpkg == null) {
@@ -171,11 +196,15 @@ function findClassParentSub(pkg, id, maxdepth, depth) {
   return -1;
 }
 
-function findDependencieDestination(id, maxdepth) {
-  return findDependencieDestinationSub(packagetree, id, maxdepth, 0);
-}
-
-function findDependencieDestinationSub(pkg, id, maxdepth, depth) {
+/**
+ * Finds package which is the destination of the dependencie in the visualization.
+ * @param {object} pkg - package to search through (haystack).
+ * @param {int} id - needle.
+ * @param {int} maxdepth - if found id is lower than this depth, parent at this depth must be returned.
+ * @param {int} depth - current depth.
+ * @returns {(null|object)} null if id is not found or the destination package.
+ */
+function findDependencieDestination(pkg, id, maxdepth, depth) {
   if (pkg.id == id) {
     return pkg;
   }
@@ -183,7 +212,7 @@ function findDependencieDestinationSub(pkg, id, maxdepth, depth) {
   let i = 0;
   let keys = Object.keys(pkg.children);
   while (foundpkg == null && i < keys.length) {
-    foundpkg = findDependencieDestinationSub(pkg.children[keys[i]], id, maxdepth, depth+1);
+    foundpkg = findDependencieDestination(pkg.children[keys[i]], id, maxdepth, depth+1);
     i++;
   }
   if (foundpkg == null) {
@@ -195,18 +224,17 @@ function findDependencieDestinationSub(pkg, id, maxdepth, depth) {
   return pkg;
 }
 
-function giveAllPackagesAnId() {
-  let nextid = classes.length + 1;
-  giveAllSubPackagesAnId(packagetree, nextid);
-}
-
-function giveAllSubPackagesAnId(pkg, nextid) {
+/**
+ * @param {object} pkg - package.
+ * @param {int} nextid - int for which no int larger than nextid is already an id.
+ */
+function giveAllPackagesAnId(pkg, nextid) {
   if (!Object.keys(pkg).includes('id')) {
     pkg.id = nextid;
     nextid++;
   }
-  Object.keys(pkg.children).forEach((key, index) => {
-    nextid = giveAllSubPackagesAnId(pkg.children[key], nextid);
+  Object.keys(pkg.children).forEach(key => {
+    nextid = giveAllPackagesAnId(pkg.children[key], nextid);
   });
   return nextid;
 }
