@@ -107,8 +107,6 @@ function getChildPackageDimensions(pkg) {
 function drawPackageRect(pkg, depth) {
     let elem = document.createElementNS(ns, "g");
     elem.setAttribute("transform", "translate(" + pkg.x + "," + pkg.y + ")");
-    elem.setAttribute("onmouseenter", "enlarge(this)");
-    elem.setAttribute("onmouseleave", "reduce(this)");
     elem.setAttribute("onclick", "toggleExpanded("+pkg.id+")");
     let parent = main_g.appendChild(elem);
 
@@ -147,8 +145,6 @@ function drawClassRect(cla, depth) {
     }
     let elem = document.createElementNS(ns, "g");
     elem.setAttribute("transform", "translate(" + cla.x + "," + cla.y + ")");
-    elem.setAttribute("onmouseenter", "enlarge(this)");
-    elem.setAttribute("onmouseleave", "reduce(this)");
     let parent = main_g.appendChild(elem);
 
     let classpadding = 0;

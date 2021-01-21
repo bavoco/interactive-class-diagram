@@ -15,29 +15,6 @@ var threshold_slider_val = 1;
 var aggregate_dependencies = true;
 
 /**
- * Make an element larger.
- * @param {SVGElement} elem element to enlarge
- */
-function enlarge(elem) {
-  if (zoomlevel > 6) {
-    return;
-  }
-  elem = main_g.removeChild(elem);
-  let content = elem.getAttribute('transform');
-  elem.setAttribute('transform', content+"scale(5)");
-  main_g.appendChild(elem);
-}
-
-/**
- * Make an enlarged element small.
- * @param {SVGElement} elem element to reduce
- */
-function reduce(elem) {
-  let content = elem.getAttribute('transform');
-  elem.setAttribute('transform', content.replace('scale(5)', ''));
-}
-
-/**
  * Toggle expanded on a package.
  * @param {int} id package to toggle
  */
