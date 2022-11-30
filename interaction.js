@@ -48,9 +48,9 @@ function classRoleHidden(cla) {
 function zoom(e) {
   e.preventDefault();
   let oldzoom = zoomlevel;
-  zoomlevel += e.deltaY * -0.01;
+  zoomlevel += e.deltaY * -0.001;
   // Restrict scale
-  zoomlevel = Math.min(Math.max(0.5, zoomlevel), 8);
+  zoomlevel = Math.min(Math.max(0.25, zoomlevel), 8);
   let zoom_dif = zoomlevel - oldzoom;
   if (zoom_dif != 0) {
     let old_svg_x = (e.offsetX - pan_x) / (oldzoom * svgElement.clientWidth) * zoom_dif * svgElement.clientWidth;
